@@ -511,16 +511,16 @@ Design the data model and user experience that best supports this. The primary u
 
   <figure>
     <img src="images/img-20260510214529.png" alt="Entity-relationship diagram showing Quiz, Round, Question, Team and TeamAnswer tables">
-    <figcaption>Quiz → Round → Question, with Team and TeamAnswer joining via the scoring fields.</figcaption>
+    <figcaption>Quiz → Round → Question, with Team and TeamAnswer joining via the scoring fields.</figcaption> 
   </figure>
 
   <p>We can see it has created all the tables we need. To help visualise this more, what we need is some dummy data, so let's get that created.</p>
 
-  <h3>Lets get some data</h3>
+  <h3>Let's get some data</h3>
 
   <p>Build Agent won't create test data automatically, so let's ask it to create some dummy data for us to play with:</p>
 
-  <div class="prompt">Can you create me some test daya for the application.</div>
+  <div class="prompt">Can you create me some test data for the application.</div>
 
   <p>The system will go off and create some test data for you to help build out the application:</p>
 
@@ -635,11 +635,11 @@ Design the data model and user experience that best supports this. The primary u
     <figcaption>The new <code>team_owner</code> reference field on the Team table.</figcaption>
   </figure>
 
-  <h3>Now lets create a team player UI</h3>
+  <h3>Now let's create a team player UI</h3>
 
   <p>Now let's ask Build Agent to create us a modern UI using React that team owners will interact with to answer the questions as they go active:</p>
 
-  <div class="prompt">Now we need to create a interactive UI for the team owner to log into. The owner will pick the team, if they are on more than 1 team to start with. When the quiz starts the team owner will see the question, where they can put in an answer and submit it. Once they have added an answer they can't then change it. They then wait for the next question to be made active. The interface needs to be clean and fun.</div>
+  <div class="prompt">Now we need to create an interactive UI for the team owner to log into. The owner will pick the team, if they are on more than 1 team to start with. When the quiz starts the team owner will see the question, where they can put in an answer and submit it. Once they have added an answer they can't then change it. They then wait for the next question to be made active. The interface needs to be clean and fun.</div>
 
   <p>Make sure you are a team owner and then try and view the page. I have added myself as the team owner for two teams, so I see them both here:</p>
 
