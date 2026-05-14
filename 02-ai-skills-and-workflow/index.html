@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adding AI Skills — Pub Quiz Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ServiceNow brand palette
+       Dark Green (Outer Space) #293E40 — primary
+       Light Green (Kailani)    #81B5A1 — secondary
+       Plus supporting neutrals tuned to the brand */
+    --bg: #f3f1ec;             /* warm off-white page */
+    --bg-paper: #ffffff;       /* clean panels */
+    --ink: #1a2628;            /* near-black with a green hint */
+    --ink-soft: #3a4b4d;       /* body-soft */
+    --ink-faint: #6f7e80;      /* captions, meta */
+    --accent: #293E40;         /* SN dark green — primary brand */
+    --accent-deep: #182729;    /* deeper dark green for emphasis */
+    --secondary: #81B5A1;      /* SN light green — secondary brand */
+    --secondary-soft: #c8ddd2; /* very pale wash of light green */
+    --rule: #293E40;           /* dividers in primary brand colour */
+    --highlight: #d4e7dd;      /* light-green tint for emphasis */
+    --code-bg: #1a2628;        /* prompt-block backdrop, ink-tone */
+    --code-ink: #e8efed;       /* prompt-block text */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    font-size: 17px;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(41, 62, 64, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 80% 60%, rgba(129, 181, 161, 0.10) 0%, transparent 40%);
+    background-attachment: fixed;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 80px 48px 120px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .breadcrumb {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .breadcrumb a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent);
+    padding-bottom: 1px;
+  }
+
+  .breadcrumb a:hover { color: var(--accent-deep); }
+
+  header {
+    text-align: center;
+    margin-bottom: 80px;
+    padding-bottom: 48px;
+    border-bottom: 2px solid var(--rule);
+    position: relative;
+  }
+
+  header::after {
+    content: '✦';
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    padding: 0 16px;
+    color: var(--accent);
+    font-size: 22px;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(48px, 8vw, 88px);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    margin-bottom: 20px;
+    font-variation-settings: "opsz" 144;
+  }
+
+  h1 .ampersand {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .subtitle {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink-soft);
+    font-weight: 400;
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.4;
+  }
+
+  .intro {
+    background: var(--bg-paper);
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    border-left: 4px solid var(--accent);
+    padding: 32px 40px;
+    margin-bottom: 64px;
+    box-shadow: 4px 4px 0 rgba(42, 38, 32, 0.06);
+  }
+
+  .intro p { margin-bottom: 16px; }
+  .intro p:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 42px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 80px 0 24px;
+  }
+
+  h2 .num {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+    font-variation-settings: normal;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 26px;
+    color: var(--ink);
+    margin: 48px 0 16px;
+    letter-spacing: -0.01em;
+  }
+
+  h4 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 32px 0 12px;
+  }
+
+  p {
+    margin-bottom: 20px;
+    max-width: 68ch;
+  }
+
+  p strong {
+    font-weight: 600;
+    color: var(--ink);
+    background: linear-gradient(180deg, transparent 60%, var(--highlight) 60%);
+    padding: 0 2px;
+  }
+
+  ul, ol {
+    margin: 0 0 24px 24px;
+    padding-left: 8px;
+  }
+
+  ul li, ol li {
+    margin-bottom: 10px;
+    padding-left: 8px;
+  }
+
+  ul li::marker {
+    color: var(--accent);
+    content: '◆  ';
+  }
+
+  ol li::marker {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+
+  .prompt {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 28px 32px;
+    margin: 28px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    position: relative;
+    border-radius: 2px;
+    box-shadow:
+      0 2px 0 var(--accent),
+      6px 6px 0 rgba(42, 38, 32, 0.15);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .prompt::before {
+    content: 'PROMPT';
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: var(--accent);
+    color: var(--bg-paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+    padding: 4px 10px;
+  }
+
+  .prompt::after {
+    content: '↪';
+    position: absolute;
+    top: 8px;
+    right: 16px;
+    color: var(--secondary);
+    font-size: 18px;
+    opacity: 0.6;
+  }
+
+  .prompt.json::before { content: 'JSON'; }
+  .prompt.url::before  { content: 'URL'; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+    background: rgba(41, 62, 64, 0.06);
+    color: var(--accent-deep);
+    padding: 2px 6px;
+    border-radius: 2px;
+    border: 1px solid rgba(41, 62, 64, 0.12);
+  }
+
+  .callout {
+    background: var(--bg-paper);
+    border-left: 3px solid var(--secondary);
+    padding: 20px 28px;
+    margin: 28px 0;
+    font-size: 16px;
+  }
+
+  .callout strong { color: var(--accent-deep); }
+
+  .callout.protip { border-left-color: var(--accent); }
+  .callout.protip::before {
+    content: 'PRO TIP';
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  figure {
+    margin: 40px 0;
+    text-align: center;
+  }
+
+  figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid rgba(42, 38, 32, 0.15);
+    box-shadow: 4px 4px 0 rgba(42, 38, 32, 0.1);
+    background: white;
+  }
+
+  figure.narrow img {
+    max-width: 380px;
+  }
+
+  figcaption {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-faint);
+    margin-top: 12px;
+    max-width: 60ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .field-table {
+    background: var(--bg-paper);
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    border-collapse: collapse;
+    width: 100%;
+    margin: 24px 0 32px;
+    font-size: 15px;
+    box-shadow: 4px 4px 0 rgba(42, 38, 32, 0.06);
+  }
+
+  .field-table th {
+    background: var(--accent);
+    color: var(--bg-paper);
+    text-align: left;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .field-table td {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(42, 38, 32, 0.1);
+    vertical-align: top;
+  }
+
+  .field-table tr:nth-child(even) td {
+    background: rgba(129, 181, 161, 0.06);
+  }
+
+  .field-table td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent-deep);
+    white-space: nowrap;
+  }
+
+  .checklist {
+    background: var(--bg-paper);
+    padding: 24px 32px;
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    margin: 24px 0 32px;
+  }
+
+  .checklist ol {
+    margin: 0;
+    counter-reset: cl;
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .checklist ol li {
+    counter-increment: cl;
+    padding-left: 40px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .checklist ol li::before {
+    content: counter(cl);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+
+  .checklist ol li::marker { content: none; }
+
+  footer {
+    margin-top: 120px;
+    padding-top: 48px;
+    border-top: 2px solid var(--rule);
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--ink-faint);
+    font-size: 15px;
+  }
+
+  footer .ornament {
+    font-size: 24px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    letter-spacing: 0.5em;
+  }
+
+  .toc {
+    background: var(--bg-paper);
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    padding: 24px 32px;
+    margin: 0 0 64px;
+  }
+
+  .toc-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .toc ol li {
+    padding: 6px 0;
+    border-bottom: 1px dotted rgba(42, 38, 32, 0.2);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .toc ol li:last-child { border-bottom: none; }
+  .toc ol li::marker { content: none; }
+  .toc ol li::before { content: none; }
+
+  .toc ol li .num-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+    min-width: 40px;
+    flex-shrink: 0;
+  }
+
+  .toc ol li a {
+    color: var(--ink);
+    text-decoration: none;
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    flex: 1;
+    transition: color 0.2s;
+  }
+
+  .toc ol li a:hover { color: var(--accent); }
+
+  .divider {
+    text-align: center;
+    margin: 64px 0 32px;
+    color: var(--accent);
+    font-size: 18px;
+    letter-spacing: 1em;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 48px 24px 80px; }
+    h1 { font-size: 48px; }
+    h2 { font-size: 32px; }
+    h3 { font-size: 22px; }
+    body { font-size: 16px; }
+    .intro, .callout, .checklist, .toc { padding-left: 20px; padding-right: 20px; }
+    .prompt { padding: 24px 20px; font-size: 13px; }
+    .field-table { font-size: 13px; }
+    .field-table th, .field-table td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="breadcrumb"><a href="../index.html">← Pub Quiz Manager Workshops</a></div>
+
+  <header>
+    <div class="eyebrow">Part Two — A ServiceNow Skill Kit Workshop</div>
+    <h1>AI Skills <span class="ampersand">&amp;</span><br>the Pub Quiz</h1>
+    <p class="subtitle">Building an AI skill and a workflow that uses it, so the Pub Quiz Manager can generate its own rounds, questions and answers.</p>
+  </header>
+
+  <div class="intro">
+    <p>We've already built the Pub Quiz Manager and had Build Agent generate some example data for us. Now we want to use the AI capability of the platform to actually <strong>build out a quiz</strong> — rounds, questions, answers — on demand.</p>
+    <p>In ServiceNow we can build a <strong>skill</strong> that generates questions and answers for us. We can then embed that skill in workflows, buttons, and even make it agentic. This walk-through covers creating the skill, tuning its prompt, and wiring it into a catalogue-item-driven flow.</p>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Session Structure</div>
+    <ol>
+      <li><span class="num-tag">§ 1</span><a href="#section-1">Create a Skill in Skill Kit</a></li>
+      <li><span class="num-tag">§ 2</span><a href="#section-2">Add more inputs and tune the prompt</a></li>
+      <li><span class="num-tag">§ 3</span><a href="#section-3">Change the output to structured JSON</a></li>
+      <li><span class="num-tag">§ 4</span><a href="#section-4">Publish and activate the skill</a></li>
+      <li><span class="num-tag">§ 5</span><a href="#section-5">Build an action to parse the JSON into records</a></li>
+      <li><span class="num-tag">§ 6</span><a href="#section-6">A catalogue item and a flow to drive it all</a></li>
+      <li><span class="num-tag">§ 7</span><a href="#section-7">Test the whole thing end to end</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================== SECTION 1 ============================== -->
+
+  <h2 id="section-1"><span class="num">Section 01 — Create a Skill</span>Building our first AI skill</h2>
+
+  <p>A <strong>skill</strong> in ServiceNow is the basic building block for AI. It's our ability to interact with the LLM the way you would if you were using a tool like Claude or Gemini — we give the AI a task, some data, and we ask for an output.</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Log into your ServiceNow instance and navigate to <strong>Skill Kit</strong>, then click <strong>Home</strong>.</li>
+    </ol>
+  </div>
+
+  <figure class="narrow">
+    <img src="images/img-20260514133721.png" alt="Skill Kit home page in the ServiceNow navigator">
+    <figcaption>Skill Kit — the home of every custom AI skill on the platform.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="2">
+      <li>On the <strong>Custom Skills</strong> tab, click <strong>Create Skill</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514133831.png" alt="Custom Skills tab with the Create Skill button highlighted">
+    <figcaption>The Custom Skills tab — this is where new skills are born.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="3">
+      <li>Give the skill a name and a description. The description is important — it's used to help build out the LLM prompt for you, and it's also how agents know what the skill does.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514134152.png" alt="Skill setup screen with name and description fields">
+    <figcaption>The skill setup — name and description matter more than they look.</figcaption>
+  </figure>
+
+  <p>You can use your own name and description. The name is less important, but since you're on a shared environment, put your initials in <code>[]</code> at the front or end to identify your skill.</p>
+
+  <table class="field-table">
+    <thead>
+      <tr><th>Field</th><th>Value</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Name</td>
+        <td>Pub Quiz Question and Answer Generator</td>
+      </tr>
+      <tr>
+        <td>Description</td>
+        <td>Creates questions for the pub quiz application. The skill will create questions and the correct answer that are grouped into rounds. Each question will be given a score out of 5, where 1 is an easy question and 5 is a hard question.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>At this stage we're giving the skill an <em>overview</em> of what we want it to do. We'll get into the actual prompt shortly.</p>
+
+  <div class="checklist">
+    <ol start="4">
+      <li>Pick the appropriate model. In this scenario I'm using <strong>Claude</strong> — I find it gives the best output for this kind of task. You can change the model later to try others.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514134735.png" alt="Model picker showing Claude selected as the LLM for this skill">
+    <figcaption>Pick your model — but you can always change your mind.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="5">
+      <li>Scroll down and specify the role that the skill will have when it runs. This is usually the role it needs to access any data it would be given. For our scenario we're not worrying about that, so pick <code>snc_internal</code> and click <strong>Continue</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514134818.png" alt="Role configuration screen with snc_internal selected">
+    <figcaption>The role determines what data the skill is allowed to see at runtime.</figcaption>
+  </figure>
+
+  <h3>Letting the LLM write its own prompt</h3>
+
+  <div class="checklist">
+    <ol start="6">
+      <li>You'll now be taken to a screen to help you build out the prompt. We're going to get the LLM to help us — select <strong>Use an AI-generated prompt</strong>. The system will take the name and description and create an LLM prompt from that.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514135102.png" alt="The AI-generated prompt option in the prompt builder">
+    <figcaption>Let the LLM bootstrap your prompt — surprisingly good as a starter for ten.</figcaption>
+  </figure>
+
+  <p>The prompt that was generated was:</p>
+
+  <div class="prompt">## Role
+
+You are a quiz question creator with expertise in trivia and game design. Your task is to generate pub quiz questions grouped into rounds, each with a difficulty score (1-5), along with the correct answers. Ensure questions vary in topic and complexity while maintaining clarity and fairness.
+
+## Context
+
+The pub quiz application requires the following inputs:
+- **{{#input_rounds}}**: Number of rounds to create (e.g., 3 rounds).
+- **{{#input_topics}}**: List of topics for questions (e.g., history, science, pop culture).
+- **{{#input_difficulty_distribution}}**: Desired distribution of difficulty scores (e.g., 2 easy, 1 medium, 2 hard).
+
+## Instructions
+
+1. **Review Inputs**: Analyze the number of rounds, topics, and difficulty distribution provided.
+
+2. **Generate Questions**:
+- Create questions for each round, ensuring they align with the specified topics.
+- Assign a difficulty score (1-5) to each question based on complexity.
+- Balance the difficulty distribution across rounds (e.g., if 2 easy questions are requested, spread them across rounds).
+
+3. **Validate Clarity**: Ensure questions are unambiguous and answers are verifiable.
+
+4. **Format Output**: Group questions by round, list each question with its score, and provide the correct answer.
+
+## Output
+
+The output should be a plain text list of quiz questions structured as follows:
+**Round [X]:**
+- **Q[Y]**: [Question text] (Score: [score/5])
+Answer: [Correct answer]
+
+Example format:
+
+**Round 1:**
+- **Q1**: What is the capital of France? (Score: 1/5)
+Answer: Paris
+- **Q2**: Who wrote "1984"? (Score: 2/5)
+Answer: George Orwell
+
+Ensure questions and answers are accurate, engaging, and match the input criteria.</div>
+
+  <p>From our initial description, the AI has done a great job of producing a well-formatted prompt. We'll be tweaking it, but as a starter for ten this is great.</p>
+
+  <p>If you're not happy with what gets generated, click the <strong>regenerate</strong> button to make the LLM have another go. If it's completely wrong, go back and check the description — maybe change that slightly and try again.</p>
+
+  <div class="callout">
+    <strong>Don't forget:</strong> if the prompt looks good, click <strong>Use Prompt</strong> and then <strong>Continue</strong>. If you forget to click Use Prompt, the prompt will get forgotten.
+  </div>
+
+  <h3>Adding Skill Inputs</h3>
+
+  <div class="checklist">
+    <ol start="7">
+      <li>Next we add the parameters we want to feed into the skill — these are called <strong>Skill Inputs</strong>. Click <strong>[+] Add</strong> and start filling them in.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514140025.png" alt="Skill Inputs configuration screen with the Add button visible">
+    <figcaption>Skill Inputs — the parameters the prompt will reference.</figcaption>
+  </figure>
+
+  <table class="field-table">
+    <thead>
+      <tr><th>Data Type</th><th>Name</th><th>Description</th><th>Test Value</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Numeric</td>
+        <td>Number of rounds</td>
+        <td>Total question rounds</td>
+        <td>5</td>
+      </tr>
+      <tr>
+        <td>String</td>
+        <td>Topics</td>
+        <td>Topics for rounds</td>
+        <td>General Knowledge, Music, Culture</td>
+      </tr>
+      <tr>
+        <td>String</td>
+        <td>Difficulty Distribution</td>
+        <td>What kind of difficulty do we want</td>
+        <td>Mainly easy, some medium and a few hard</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Repeat for all the inputs. Don't worry if you forget one — we can add them later as well.</p>
+
+  <div class="checklist">
+    <ol start="8">
+      <li>Click <strong>Continue to Summary</strong>, then on the summary screen click <strong>Finish Setup</strong>.</li>
+    </ol>
+  </div>
+
+  <h3>Mapping inputs into the prompt</h3>
+
+  <div class="checklist">
+    <ol start="9">
+      <li>Now we need to map the inputs into the prompt. You'll see placeholders with <code>{{ }}</code> around them — for example <code>{{#input_rounds}}</code>. Highlight one (or just delete it), then click <strong>+ Inputs and tools</strong>.</li>
+    </ol>
+  </div>
+
+  <figure class="narrow">
+    <img src="images/img-20260514141004.png" alt="The Inputs and tools button next to a prompt placeholder">
+    <figcaption>Replace the placeholders with real inputs via the + Inputs and tools menu.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="10">
+      <li>Select the input you want to use.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514141134.png" alt="The input picker showing the available skill inputs">
+    <figcaption>Pick the input and it gets swapped into the prompt.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="11">
+      <li>This replaces the placeholder. Once you've done all of them, your prompt should look like this:</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514141345.png" alt="Snippet of the prompt with the inputs correctly mapped in">
+    <figcaption>A short snippet showing the inputs cleanly wired into the prompt body.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <strong>Think of it as a basic mail merge</strong> — the input data is simply dropped in where these placeholders are.
+  </div>
+
+  <h3>Running the first test</h3>
+
+  <div class="checklist">
+    <ol start="12">
+      <li>Now we can test the prompt. Click <strong>Run Test</strong> at the bottom of the page — you'll get a dialog to fill in the parameters, with your defaults pre-populated.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514141539.png" alt="The Run Test dialog with the default parameter values pre-filled">
+    <figcaption>The test dialog — defaults from the Skill Inputs come through automatically.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="13">
+      <li>Click <strong>Run Test</strong> to see what comes out.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514142734.png" alt="Initial test output, truncated because of the small token limit">
+    <figcaption>First test result — note the output gets truncated.</figcaption>
+  </figure>
+
+  <p>The output above has been truncated because the context window for the response is too small. At the bottom of the text box, you'll see that <strong>500 tokens</strong> were used to generate the output. We need to increase this.</p>
+
+  <div class="checklist">
+    <ol start="14">
+      <li>Scroll back up and find the <strong>prompt settings</strong> icon on the right-hand side of the window.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514142939.png" alt="The prompt settings icon on the right of the prompt editor">
+    <figcaption>The settings cog — easy to miss, important to find.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="15">
+      <li>Click it. You'll see a Tokens section with a limit of 500 — we need to bump this up.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514143032.png" alt="Token settings panel showing the 500-token default">
+    <figcaption>The default 500-token ceiling — fine for a one-liner, no good for a quiz.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <strong>Heads up:</strong> not all LLM providers will let you change this — some have a much smaller token limit.
+  </div>
+
+  <div class="checklist">
+    <ol start="16">
+      <li>Increase the response tokens to <strong>1500</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514150159.png" alt="Token limit increased to 1500">
+    <figcaption>1500 tokens — plenty of room for several rounds.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="17">
+      <li>Run the test again. The output is now complete, and you'll see we're using well under the 1500 limit.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514150346.png" alt="Test output now completing within the new token budget">
+    <figcaption>Full output, comfortably under the new ceiling.</figcaption>
+  </figure>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 2 ============================== -->
+
+  <h2 id="section-2"><span class="num">Section 02 — Tuning</span>Adding more information to the prompt</h2>
+
+  <p>At the moment we're getting 3 questions per round. What if we wanted to increase that? It would be useful to add an extra parameter for the number of questions per round.</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Add a new Skill Input for the <strong>number of questions per round</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514150635.png" alt="New skill input added for number of questions per round">
+    <figcaption>The new input — Numeric, with a sensible default.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="2">
+      <li>Wire it into the prompt:</li>
+    </ol>
+  </div>
+
+  <div class="prompt">## Role
+You are a quiz question creator with expertise in trivia and game design. Your task is to generate pub quiz questions grouped into rounds, each with a difficulty score (1-5), along with the correct answers. Ensure questions vary in topic and complexity while maintaining clarity and fairness.
+
+## Context
+The pub quiz application requires the following inputs:
+- **{{number_of_rounds}}**: Number of rounds to create (e.g., 3 rounds).
+- **{{number_of_questions_per_round}}**: Number of questions per round (e.g. 5 questions).
+- **{{topics}}**: List of topics for questions (e.g., history, science, pop culture).
+- **{{difficulty_distribution}}**: Desired distribution of difficulty scores (e.g., 2 easy, 1 medium, 2 hard).</div>
+
+  <p>You can see the additional line that's been added.</p>
+
+  <div class="checklist">
+    <ol start="3">
+      <li>Run it and see what the output gives.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514150938.png" alt="Test output now showing more questions per round">
+    <figcaption>More questions, more tokens — the response is denser now.</figcaption>
+  </figure>
+
+  <p>As you can see the total response tokens has increased — we asked for more questions, so the model produced more.</p>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 3 ============================== -->
+
+  <h2 id="section-3"><span class="num">Section 03 — Structured output</span>Changing the output to JSON</h2>
+
+  <p>The output we have is fine to read, but a workflow will struggle to work with it. What we ideally want is some form of JSON that we can parse and use to fill in records. So let's tell the LLM that we want a JSON output.</p>
+
+  <p>Change the <strong>Output</strong> section of the prompt to this — note how we give a structure <em>and</em> an example, which really helps the LLM:</p>
+
+  <div class="prompt">## Output
+The output should be a structured JSON format, following this structure:
+
+[{
+  "Name": [The round name],
+  [{"Sequence": [Question Number],
+    "Question": [Question Text],
+    "Score": [Question Score/5],
+    "Answer": [Correct answer]
+   }]
+}]
+
+Example output:
+[{
+  "Name": "Round 1",
+  [{"Sequence": 1,
+    "Question": "What is the capital of France?",
+    "Score": 1,
+    "Answer": "Paris"
+  }]
+}]
+
+Ensure questions and answers are accurate, engaging, and match the input criteria.</div>
+
+  <div class="callout">
+    <strong>Token watch:</strong> now that we have structure, you'll notice the output tokens are getting close to our limit. You may want to push it up to <strong>2000</strong>.
+  </div>
+
+  <h3>Have a play — make the prompt your own</h3>
+
+  <p>In the example below, I tweaked the prompt to give a better JSON structure, a quiz name, and totals for each round and the quiz overall. What else could you get the prompt to do?</p>
+
+  <div class="prompt">## Role
+You are a quiz question creator with expertise in trivia and game design. Your task is to generate pub quiz questions grouped into rounds, each with a difficulty score (1-5), along with the correct answers. Ensure questions vary in topic and complexity while maintaining clarity and fairness.
+
+## Context
+The pub quiz application requires the following inputs:
+- **{{number_of_rounds}}**: Number of rounds to create (e.g., 3 rounds).
+- **{{number_of_questions_per_round}}**: Number of questions per round (e.g. 5 questions).
+- **{{topics}}**: List of topics for questions (e.g., history, science, pop culture).
+- **{{difficulty_distribution}}**: Desired distribution of difficulty scores (e.g., 2 easy, 1 medium, 2 hard).
+
+## Instructions
+1. **Review Inputs**: Analyze the number of rounds, topics, and difficulty distribution provided.
+2. **Generate Questions**:
+   - Create questions for each round, ensuring they align with the specified topics.
+   - Assign a difficulty score (1-5) to each question based on complexity.
+   - Balance the difficulty distribution across rounds.
+3. **Validate Clarity**: Ensure questions are unambiguous and answers are verifiable.
+4. **Format Output**: Group questions by round, list each question with its score, and provide the correct answer.
+5. Add up the total possible correct answer score and include it at the end of the JSON; also total up each round.
+
+## Output
+The output should be a structured JSON format, following this structure:
+
+{"Quiz Name": [Suggest a title for the Quiz],
+ "Total Score": [Max possible score],
+ "Rounds": [
+  {
+   "Name": [The round name],
+   "Total Points": [Max Possible Score for the round],
+   "Questions": [{
+       "Sequence": [Question Number],
+       "Question": [Question Text],
+       "Score": [Question Score/5],
+       "Answer": [Correct answer]
+   }]
+  }
+ ]
+}
+
+Ensure questions and answers are accurate, engaging, and match the input criteria.</div>
+
+  <div class="callout protip">
+    Before you go any further, take the example output and paste it into a tool like <strong>Visual Studio Code</strong> or <strong>TextMate</strong> to validate the structure the LLM has produced. This saves you a lot of time later if the structure isn't valid.
+  </div>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 4 ============================== -->
+
+  <h2 id="section-4"><span class="num">Section 04 — Publish</span>Finishing the skill and making it active</h2>
+
+  <p>Right — we've finished building the skill. Now we want to make it active.</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Save</strong> on the prompt window.</li>
+      <li>Give the prompt a better name — click the pencil next to "AI-generated prompt" and enter a sensible one.</li>
+      <li>Click the <strong>padlock</strong> to the left of the <strong>Manage Prompt</strong> button to finalise the prompt. Don't worry, we can come back and change it later if we need to.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514183240.png" alt="The padlock icon used to finalise the prompt">
+    <figcaption>The padlock — final-ish, not final.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="4">
+      <li>Click <strong>4. Deployment and skill settings</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514183443.png" alt="Deployment and skill settings step in the skill wizard">
+    <figcaption>The deployment step — where the skill earns its passport.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="5">
+      <li>Select <strong>Flow Action</strong> as where you want to use this skill. We <em>could</em> use it in a UI Action, but we'd need to build some scripts to extract the data and fill in the tables — we'll come back to that another day. If your skill fits with one of the other workflows (such as ITSM), you can add it there too. For now, leave it set to <strong>Other</strong>.</li>
+      <li>Click <strong>Publish Skill</strong> at the top of the page. You'll get a dialog like this:</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514183718.png" alt="Publish Skill dialog asking which version should be active">
+    <figcaption>The publish dialog — pick which version goes live.</figcaption>
+  </figure>
+
+  <p>If you've defined multiple versions (or you're trying out a new LLM), you'll be asked which one should be active. Pick one and click <strong>Publish</strong>.</p>
+
+  <p>Well done — you have built a skill. But now we need to activate it.</p>
+
+  <div class="checklist">
+    <ol start="7">
+      <li>At the top of the page there is an Admin menu — click it and select <strong>Now Assist Admin</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514183958.png" alt="Admin menu with Now Assist Admin option">
+    <figcaption>Now Assist Admin — the control panel for activating skills.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="8">
+      <li>Click the <strong>Now Assist skills</strong> tab and then the <strong>Other</strong> section on the left.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514184053.png" alt="Now Assist skills tab with Other category selected">
+    <figcaption>The Other category — where custom skills live until they find a workflow home.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="9">
+      <li>Click the <strong>Available</strong> tab. Your new "Pub Quiz Question and Answer Generator" skill should show. If it doesn't, go back to the skill and make sure you've published it.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514184152.png" alt="Available skills list showing the new Pub Quiz Question and Answer Generator">
+    <figcaption>The skill, listed and ready to be switched on.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="10">
+      <li>Click <strong>Activate Skill</strong>. You'll be asked to activate for the options you chose — in our case just <strong>Flow Action</strong>. Click the toggle and then <strong>Save and Continue</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514184311.png" alt="Activate Skill dialog with the Flow Action toggle">
+    <figcaption>Activate for Flow Action — exactly what we need next.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="11">
+      <li>Review the access requirements — you can add extra roles here if you like. For now just click <strong>Save and Continue</strong>.</li>
+      <li>On the review page, click <strong>Activate</strong>.</li>
+    </ol>
+  </div>
+
+  <p>The skill is now active and we can start to use it in our flows.</p>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 5 ============================== -->
+
+  <h2 id="section-5"><span class="num">Section 05 — Parse and create</span>An action to turn JSON into records</h2>
+
+  <p>Now we have our super-useful skill, we need to make use of it. So we're going to create some additional components in our application to leverage it.</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Switch back to ServiceNow Studio and start a new Build Agent session — we're going to get Build Agent to do the heavy lifting for us.</li>
+    </ol>
+  </div>
+
+  <p>Here's the prompt. Notice how we paste in an actual example of the JSON the skill produces — Build Agent needs a few extra prompts when dealing with clustered records like this:</p>
+
+  <div class="prompt">I need you to create an action that accepts the JSON output from my new Skill, parse it and create the records in the rounds and questions tables. When creating records, use getUniqueValue() when finding the sysID for a newly created record and make sure you correctly link all the parent records, so question → round → Quiz. When creating the quiz record, you only need to populate it with the data you have in the JSON. Pass the new Quiz Sys ID back so the remaining data can be added.
+
+Here is an example of the output from the skill:
+
+{
+  "Quiz Name": "The Ultimate Challenge Quiz",
+  "Total Score": 85,
+  "Rounds": [
+    {
+      "Name": "Round 1: General Knowledge",
+      "Total Points": 17,
+      "Questions": [
+        { "Sequence": 1, "Question": "Which ancient wonder of the world was located in Alexandria, Egypt?", "Score": 3, "Answer": "The Lighthouse of Alexandria (Pharos of Alexandria)" },
+        { "Sequence": 2, "Question": "What is the smallest country in the world by land area?", "Score": 3, "Answer": "Vatican City" }
+      ]
+    },
+    {
+      "Name": "Round 2: Science &amp; Nature",
+      "Total Points": 17,
+      "Questions": [
+        { "Sequence": 1, "Question": "What is the chemical symbol for tungsten?", "Score": 3, "Answer": "W" },
+        { "Sequence": 2, "Question": "Which planet in our solar system has the most moons?", "Score": 3, "Answer": "Saturn" }
+      ]
+    }
+  ]
+}</div>
+
+  <div class="callout">
+    <strong>Note:</strong> I pasted the whole JSON that came out of testing the skill — only a snippet is shown here.
+  </div>
+
+  <p>Build Agent has now analysed the request and come up with a plan:</p>
+
+  <figure>
+    <img src="images/img-20260514202451.png" alt="Build Agent's plan for the JSON parsing action">
+    <figcaption>Build Agent's plan — a Flow Action with script logic to walk the JSON.</figcaption>
+  </figure>
+
+  <h3>Testing the action</h3>
+
+  <p>Build Agent created the action, but it didn't attach the output from the script to the action output — so I just need to wire that up:</p>
+
+  <figure>
+    <img src="images/img-20260514212925.png" alt="Wiring the script output to the action output">
+    <figcaption>Connect the script's return value to the action output — easy fix.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="2">
+      <li>Now let's test it to see if it works.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514213002.png" alt="Test run of the parsing action in progress">
+    <figcaption>Kicking off the test.</figcaption>
+  </figure>
+
+  <p>That has completed:</p>
+
+  <figure>
+    <img src="images/img-20260514213038.png" alt="Successful test output showing the returned sys_id">
+    <figcaption>Success — the action returned the sys_id of the new quiz record.</figcaption>
+  </figure>
+
+  <p>It returned the sys_id of the record it created. Let's go check the data:</p>
+
+  <figure>
+    <img src="images/img-20260514213152.png" alt="The newly created quiz record with rounds and questions populated">
+    <figcaption>Quiz, rounds and questions — all created from the JSON.</figcaption>
+  </figure>
+
+  <p>Some fields still need to be filled in — but we'll build a workflow to handle that.</p>
+
+  <div class="checklist">
+    <ol start="3">
+      <li>Make sure you <strong>publish</strong> the action.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514215815.png" alt="Publishing the action so it can be reused">
+    <figcaption>Publish — otherwise it won't be available to use in flows.</figcaption>
+  </figure>
+
+  <h3>Recap</h3>
+
+  <p>We've created a skill to generate the outline of a quiz for us. It requires some fields to get started:</p>
+
+  <figure>
+    <img src="images/img-20260514213502.png" alt="The skill's input fields summarised">
+    <figcaption>The inputs the skill expects every time it runs.</figcaption>
+  </figure>
+
+  <p>We also need a few extra pieces of data to finish building the quiz record:</p>
+
+  <ul>
+    <li>Quiz Date &amp; Time</li>
+    <li>Location / Venue</li>
+    <li>Description</li>
+  </ul>
+
+  <p>So we need a way to gather that extra information and complete the process. One nice approach is to use a <strong>catalogue item</strong> to give us a logical starting point.</p>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 6 ============================== -->
+
+  <h2 id="section-6"><span class="num">Section 06 — Catalogue &amp; flow</span>Building the catalogue item that drives it all</h2>
+
+  <p>Let's start with a prompt to create the catalogue item:</p>
+
+  <div class="prompt">Create me a catalogue item called "Pub Quiz Creator" that has the following fields: "Quiz Date", "Location", "Description", "Number of Rounds", "Number of questions per round", "List of topics", "Difficulty of questions".</div>
+
+  <p>Build Agent has created the catalogue item:</p>
+
+  <figure>
+    <img src="images/img-20260514214159.png" alt="The new Pub Quiz Creator catalogue item">
+    <figcaption>The new Pub Quiz Creator catalogue item.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="images/img-20260514214316.png" alt="The catalogue item form with all variables shown">
+    <figcaption>The full form — every input the flow will need.</figcaption>
+  </figure>
+
+  <p>We can fine-tune this later, but before we publish, we need to create a basic workflow for it to call when someone requests it.</p>
+
+  <h3>Creating the flow ourselves in Studio</h3>
+
+  <div class="checklist">
+    <ol>
+      <li>Click the <code>+</code> in the menu bar on the left and select <strong>File</strong>.</li>
+      <li>Select <strong>Flow</strong> under the Automation section.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514214719.png" alt="New File dialog in Studio with Flow selected under Automation">
+    <figcaption>Adding a new Flow file directly from Studio.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="3">
+      <li>Select the <strong>Build on your own</strong> tab. Give it a name and a description and click <strong>Build your own</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514214825.png" alt="Build on your own tab in the flow creation wizard">
+    <figcaption>Build on your own — we want full control here.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="4">
+      <li>When the Flow Designer window comes up, the trigger is going to be <strong>Application → Service Catalogue</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514214941.png" alt="Trigger selection showing Application then Service Catalogue">
+    <figcaption>Trigger on Service Catalogue — the flow fires when the cat item is submitted.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="5">
+      <li>Add an action to <strong>get the catalogue item variables</strong>. Fill in the request record and the template catalogue item, which is our <strong>Pub Quiz Creator</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514215231.png" alt="Get catalogue variables action configured with the Pub Quiz Creator template">
+    <figcaption>Pull the variables out of the request — the flow's first real job.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="6">
+      <li>Select all the fields you want to use in the flow.</li>
+      <li>Now we want to execute our skill — this is done by selecting the action <strong>Execute Skill</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514215400.png" alt="Execute Skill action added to the flow">
+    <figcaption>Execute Skill — the bridge between the flow and our published skill.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="8">
+      <li>Pick the skill you want to use. The fields the skill requires are shown with the defaults you specified.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514215458.png" alt="Skill picker showing the Pub Quiz Question and Answer Generator">
+    <figcaption>Pick our skill from the list of activated skills.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="9">
+      <li>Map the catalogue item fields into the skill where appropriate.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514215624.png" alt="Catalogue item variables mapped into the skill inputs">
+    <figcaption>Map the cat item variables into the skill inputs — drag and drop.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="10">
+      <li>Next we want to pass the output from the skill to our action — so let's add the action next.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514215950.png" alt="Adding the JSON parsing action to the flow">
+    <figcaption>Drop in the action we built earlier.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="11">
+      <li>Drag the <strong>response</strong> object (under the output from the skill) into the action.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514220202.png" alt="Skill response wired into the parsing action's input">
+    <figcaption>The skill's response object flows straight into our parsing action.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="12">
+      <li>Now take the output from this action and <strong>open the quiz record</strong> that has been created for us.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514220440.png" alt="Look up record action retrieving the newly created quiz">
+    <figcaption>Look up the new quiz record using the sys_id we got back.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="13">
+      <li>Update the quiz record with the additional information (date, location, description).</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514220756.png" alt="Update Record action setting date, location and description">
+    <figcaption>Fill in the bits the LLM didn't know about — date, venue, description.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="14">
+      <li>Activate the flow, then attach it to the catalogue item.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514220930.png" alt="Activating the flow and attaching it to the catalogue item">
+    <figcaption>Activate and attach — the cat item now has a real engine behind it.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="15">
+      <li>Submit the catalogue item.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514221021.png" alt="Submitting the catalogue item for the first time">
+    <figcaption>The catalogue item live and ready to receive its first request.</figcaption>
+  </figure>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 7 ============================== -->
+
+  <h2 id="section-7"><span class="num">Section 07 — End to end</span>Let's test the whole thing</h2>
+
+  <div class="checklist">
+    <ol>
+      <li>On your instance, open the Employee Service Portal by navigating to:</li>
+    </ol>
+  </div>
+
+  <div class="prompt url">https://{your_instance}/esc</div>
+
+  <div class="checklist">
+    <ol start="2">
+      <li>Start typing "Pub Quiz" into the search box.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514221319.png" alt="Searching the Employee Service Portal for Pub Quiz">
+    <figcaption>Find the Pub Quiz Creator in the portal.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="3">
+      <li>Fill in the catalogue item and click <strong>Submit</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514221556.png" alt="Filled-in catalogue item ready to submit">
+    <figcaption>All the fields filled in — and away we go.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol start="4">
+      <li>Switch back to Studio and look at the flow executions.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260514221648.png" alt="Flow execution log showing a successful run">
+    <figcaption>The flow ran — every step ticked through.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="images/img-20260514221719.png" alt="Detailed view of the flow execution showing each action's output">
+    <figcaption>The detail view — every action's input and output, fully audited.</figcaption>
+  </figure>
+
+  <p>It looks like it ran — let's go see if we have a new quiz. We do:</p>
+
+  <figure>
+    <img src="images/img-20260514221833.png" alt="The freshly-generated quiz record with rounds and questions populated by the LLM">
+    <figcaption>A whole quiz — rounds, questions, answers, scores — generated by AI and saved into the platform.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <strong>What you've just built:</strong> a catalogue-item-driven, AI-powered quiz generator that takes a few parameters and produces a fully-populated quiz in seconds. From here you can layer on agentic behaviour, validation, image generation for question topics, or whatever else you fancy.
+  </div>
+
+  <footer>
+    <div class="ornament">✦ ✦ ✦</div>
+    <p>End of Part Two — next stop, agents.</p>
+  </footer>
+
+</div>
+</body>
+</html>

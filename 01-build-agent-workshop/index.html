@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Agent Workshop — Pub Quiz Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ServiceNow brand palette
+       Dark Green (Outer Space) #293E40 — primary
+       Light Green (Kailani)    #81B5A1 — secondary
+       Plus supporting neutrals tuned to the brand */
+    --bg: #f3f1ec;             /* warm off-white page */
+    --bg-paper: #ffffff;       /* clean panels */
+    --ink: #1a2628;            /* near-black with a green hint */
+    --ink-soft: #3a4b4d;       /* body-soft */
+    --ink-faint: #6f7e80;      /* captions, meta */
+    --accent: #293E40;         /* SN dark green — primary brand */
+    --accent-deep: #182729;    /* deeper dark green for emphasis */
+    --secondary: #81B5A1;      /* SN light green — secondary brand */
+    --secondary-soft: #c8ddd2; /* very pale wash of light green */
+    --rule: #293E40;           /* dividers in primary brand colour */
+    --highlight: #d4e7dd;      /* light-green tint for emphasis */
+    --code-bg: #1a2628;        /* prompt-block backdrop, ink-tone */
+    --code-ink: #e8efed;       /* prompt-block text */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    font-size: 17px;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(41, 62, 64, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 80% 60%, rgba(129, 181, 161, 0.10) 0%, transparent 40%);
+    background-attachment: fixed;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 80px 48px 120px;
+    position: relative;
+    z-index: 2;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 80px;
+    padding-bottom: 48px;
+    border-bottom: 2px solid var(--rule);
+    position: relative;
+  }
+
+  header::after {
+    content: '✦';
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    padding: 0 16px;
+    color: var(--accent);
+    font-size: 22px;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(48px, 8vw, 88px);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    margin-bottom: 20px;
+    font-variation-settings: "opsz" 144;
+  }
+
+  h1 .ampersand {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .subtitle {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink-soft);
+    font-weight: 400;
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.4;
+  }
+
+  .intro {
+    background: var(--bg-paper);
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    border-left: 4px solid var(--accent);
+    padding: 32px 40px;
+    margin-bottom: 64px;
+    box-shadow: 4px 4px 0 rgba(42, 38, 32, 0.06);
+  }
+
+  .intro p { margin-bottom: 16px; }
+  .intro p:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 42px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 80px 0 24px;
+  }
+
+  h2 .num {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+    font-variation-settings: normal;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 26px;
+    color: var(--ink);
+    margin: 48px 0 16px;
+    letter-spacing: -0.01em;
+  }
+
+  h4 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 32px 0 12px;
+  }
+
+  p {
+    margin-bottom: 20px;
+    max-width: 68ch;
+  }
+
+  p strong {
+    font-weight: 600;
+    color: var(--ink);
+    background: linear-gradient(180deg, transparent 60%, var(--highlight) 60%);
+    padding: 0 2px;
+  }
+
+  ul, ol {
+    margin: 0 0 24px 24px;
+    padding-left: 8px;
+  }
+
+  ul li, ol li {
+    margin-bottom: 10px;
+    padding-left: 8px;
+  }
+
+  ul li::marker {
+    color: var(--accent);
+    content: '◆  ';
+  }
+
+  ol li::marker {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+
+  .prompt {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 28px 32px;
+    margin: 28px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    position: relative;
+    border-radius: 2px;
+    box-shadow:
+      0 2px 0 var(--accent),
+      6px 6px 0 rgba(42, 38, 32, 0.15);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .prompt::before {
+    content: 'PROMPT';
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: var(--accent);
+    color: var(--bg-paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+    padding: 4px 10px;
+  }
+
+  .prompt::after {
+    content: '↪';
+    position: absolute;
+    top: 8px;
+    right: 16px;
+    color: var(--secondary);
+    font-size: 18px;
+    opacity: 0.6;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+    background: rgba(41, 62, 64, 0.06);
+    color: var(--accent-deep);
+    padding: 2px 6px;
+    border-radius: 2px;
+    border: 1px solid rgba(41, 62, 64, 0.12);
+  }
+
+  .callout {
+    background: var(--bg-paper);
+    border-left: 3px solid var(--secondary);
+    padding: 20px 28px;
+    margin: 28px 0;
+    font-size: 16px;
+  }
+
+  .callout strong { color: var(--accent-deep); }
+
+  figure {
+    margin: 40px 0;
+    text-align: center;
+  }
+
+  figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid rgba(42, 38, 32, 0.15);
+    box-shadow: 4px 4px 0 rgba(42, 38, 32, 0.1);
+    background: white;
+  }
+
+  figure.narrow img {
+    max-width: 380px;
+  }
+
+  figcaption {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-faint);
+    margin-top: 12px;
+    max-width: 60ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .checklist {
+    background: var(--bg-paper);
+    padding: 24px 32px;
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    margin: 24px 0 32px;
+  }
+
+  .checklist ol {
+    margin: 0;
+    counter-reset: cl;
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .checklist ol li {
+    counter-increment: cl;
+    padding-left: 40px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .checklist ol li::before {
+    content: counter(cl);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+
+  .checklist ol li::marker { content: none; }
+
+  footer {
+    margin-top: 120px;
+    padding-top: 48px;
+    border-top: 2px solid var(--rule);
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--ink-faint);
+    font-size: 15px;
+  }
+
+  footer .ornament {
+    font-size: 24px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    letter-spacing: 0.5em;
+  }
+
+  .toc {
+    background: var(--bg-paper);
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    padding: 24px 32px;
+    margin: 0 0 64px;
+  }
+
+  .toc-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .toc ol li {
+    padding: 6px 0;
+    border-bottom: 1px dotted rgba(42, 38, 32, 0.2);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .toc ol li:last-child { border-bottom: none; }
+  .toc ol li::marker { content: none; }
+  .toc ol li::before { content: none; }
+
+  .toc ol li .num-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+    min-width: 40px;
+    flex-shrink: 0;
+  }
+
+  .toc ol li a {
+    color: var(--ink);
+    text-decoration: none;
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    flex: 1;
+    transition: color 0.2s;
+  }
+
+  .toc ol li a:hover { color: var(--accent); }
+
+  .divider {
+    text-align: center;
+    margin: 64px 0 32px;
+    color: var(--accent);
+    font-size: 18px;
+    letter-spacing: 1em;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 48px 24px 80px; }
+    h1 { font-size: 48px; }
+    h2 { font-size: 32px; }
+    h3 { font-size: 22px; }
+    body { font-size: 16px; }
+    .intro, .callout, .checklist, .toc { padding-left: 20px; padding-right: 20px; }
+    .prompt { padding: 24px 20px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:32px;text-align:center;">
+    <a href="../index.html" style="color:var(--accent);text-decoration:none;border-bottom:1px dotted var(--accent);padding-bottom:1px;">← Pub Quiz Manager Workshops</a>
+  </div>
+
+  <header>
+    <div class="eyebrow">Part One — A ServiceNow Studio Workshop</div>
+    <h1>Build Agent <span class="ampersand">&amp;</span><br>the Pub Quiz</h1>
+    <p class="subtitle">A walk-through of building a complete Pub Quiz Manager application in ServiceNow Studio, one prompt at a time.</p>
+  </header>
+
+  <div class="intro">
+    <p>This workshop walks participants through building a Pub Quiz Manager application in ServiceNow Studio using Build Agent. The session uses progressive prompts that build on each other, starting with a simple foundation and ending with workflow automation and a Now Assist integration.</p>
+    <p>The structure is designed so participants can see Build Agent <strong>extend an existing app</strong>, not just create one from scratch — which is where the real magic shows.</p>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Session Structure</div>
+    <ol>
+      <li><span class="num-tag">§ 1</span><a href="#section-1">Foundation: tables, relationships and some test data</a></li>
+      <li><span class="num-tag">§ 2</span><a href="#section-2">Creating an admin workspace, extra question functionality, a workflow</a></li>
+      <li><span class="num-tag">§ 3</span><a href="#section-3">A new UI for the teams to interact with</a></li>
+      <li><span class="num-tag">§ 4</span><a href="#section-4">Automating the current question and running the quiz</a></li>
+      <li><span class="num-tag">§ A</span><a href="#appendix-a">Appendix A — UI errors: helping Build Agent fix them</a></li>
+      <li><span class="num-tag">§ B</span><a href="#appendix-b">Appendix B — Finding the URL of generated pages</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================== SECTION 1 ============================== -->
+
+  <h2 id="section-1"><span class="num">Section 01 — Foundation</span>Let's get creating our first app</h2>
+
+  <p><strong>Problem:</strong> we want to create an application to manage local pub quizzes, and we've decided to try to build it using AI. So first we need to decide what the problem is — we want our app to do the following:</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Setup a quiz, location etc</li>
+      <li>Give the quiz some structure</li>
+      <li>Holding questions for each round and the answers</li>
+      <li>Capture the team names</li>
+      <li>Capture the answers given</li>
+    </ol>
+  </div>
+
+  <p>From this, we can start to create our first prompt:</p>
+
+  <div class="prompt">Build a scoped application called Pub Quiz Manager that helps someone organise and run pub quizzes from start to finish.
+
+The app should support:
+- Setting up a quiz, including when and where it's happening and who's hosting
+- Structuring a quiz into multiple rounds, each with its own theme or category
+- Adding questions and correct answers to each round
+- Registering teams who are taking part
+- Capturing each team's answers and tracking how they score
+
+Design the data model and user experience that best supports this. The primary user is the quiz host, who needs to manage quizzes before and during the event.</div>
+
+  <p>Take this prompt and paste it into Build Agent. It will have a think for a bit and come up with a plan that it will want you to review:</p>
+
+  <figure>
+    <img src="images/img-20260509232845.png" alt="Build Agent's proposed plan with four steps">
+    <figcaption>Build Agent's proposed plan — data model, navigation, business rule, deploy.</figcaption>
+  </figure>
+
+  <p>If you're happy with the plan, click <strong>Approve</strong> to proceed. After some time, it will come up with what it has created:</p>
+
+  <figure>
+    <img src="images/img-20260509233000.png" alt="How the host uses it — checkpoint summary from Build Agent">
+    <figcaption>The summary of what's been built, plus a checkpoint marker you can restore from.</figcaption>
+  </figure>
+
+  <p>We can review everything that has been created:</p>
+
+  <figure>
+    <img src="images/img-20260509233036.png" alt="Detailed plan summary showing all tables, modules and business rules created">
+    <figcaption>The detailed plan: tables, navigation and the scoring logic, all delivered.</figcaption>
+  </figure>
+
+  <p>Let's go explore what's been created. We can see that Build Agent has created the tables with a little business logic and also created the basic navigation menu items:</p>
+
+  <figure class="narrow">
+    <img src="images/img-20260509234014.png" alt="Application navigator showing Pub Quiz Organiser modules">
+    <figcaption>The generated navigation: All Quizzes, Quiz Structure, Participants &amp; Scoring.</figcaption>
+  </figure>
+
+  <h3>The Data Structure created</h3>
+
+  <p>Build Agent has created a data structure which it has told us about in the output from the first build:</p>
+
+  <figure>
+    <img src="images/img-20260510214529.png" alt="Entity-relationship diagram showing Quiz, Round, Question, Team and TeamAnswer tables">
+    <figcaption>Quiz → Round → Question, with Team and TeamAnswer joining via the scoring fields.</figcaption> 
+  </figure>
+
+  <p>We can see it has created all the tables we need. To help visualise this more, what we need is some dummy data, so let's get that created.</p>
+
+  <h3>Let's get some data</h3>
+
+  <p>Build Agent won't create test data automatically, so let's ask it to create some dummy data for us to play with:</p>
+
+  <div class="prompt">Can you create me some test data for the application.</div>
+
+  <p>The system will go off and create some test data for you to help build out the application:</p>
+
+  <figure>
+    <img src="images/img-20260509233555.png" alt="Test data creation summary — two quizzes, seven rounds, 20 questions, six teams, 40 answers">
+    <figcaption>Comprehensive test data: 2 quizzes, 7 rounds, 20 questions, 6 teams, 40 answer records.</figcaption>
+  </figure>
+
+  <p>When I open a quiz record, I only see the quiz, as we haven't told Build Agent to set up the related lists. Let's do that next.</p>
+
+  <h3>Related Lists</h3>
+
+  <p>We can ask Build Agent to set these up for us as well:</p>
+
+  <div class="prompt">When I open the quiz record, I only see the details about the quiz. I also want to see the teams and the rounds, which are related lists. I also want to see the questions in each round as well.</div>
+
+  <p>Now it has completed and updated the table views for me as well:</p>
+
+  <figure>
+    <img src="images/img-20260510215525.png" alt="Quiz record now showing related Rounds and Teams tabs">
+    <figcaption>The Grand Friday Quiz now shows Rounds and Teams as related lists.</figcaption>
+  </figure>
+
+  <p>Now if I open the teams, I don't get to see the answers they have given as I didn't ask Build Agent for that as well — so maybe a better prompt would be a little more specific in what I wanted to do.</p>
+
+  <p>We can roll back the previous attempt and try again, so this time the prompt will be:</p>
+
+  <div class="prompt">When I open the quiz record, I only see the details about the quiz. I also want to see the teams and the rounds, which are related lists. I also want to see the questions in each round as well, the teams and their answers grouped by round. Please find all the reference fields in the applications tables and make sure they show in the appropriate parent table.</div>
+
+  <p>As you can see, the prompt this time has been a little more specific and I also added an extra clause at the end in case I missed anything.</p>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 2 ============================== -->
+
+  <h2 id="section-2"><span class="num">Section 02 — The workspace</span>Let's create a workspace</h2>
+
+  <p>Thankfully we are using App Engine, so we could use Workspace Builder to help us here — but we are going to ask Build Agent to create us one. This is a simple prompt to get us started:</p>
+
+  <div class="prompt">Create a workspace for the quiz manager to review the events, teams, questions and answers. I should be able to update and manage questions from this.</div>
+
+  <p>Build Agent will now go away and create a new workspace. It will probably look pretty basic, but we can work on that:</p>
+
+  <figure>
+    <img src="images/img-20260510234101.png" alt="Workspace deployed successfully with URL for the new Pub Quiz Manager workspace">
+    <figcaption>The workspace is live at <code>/now/pub-quiz-manager/home</code>, with a UI Builder link for editing.</figcaption>
+  </figure>
+
+  <p>Opening the workspace, we see a simple UI, but the table definitions carry across:</p>
+
+  <figure>
+    <img src="images/img-20260510234247.png" alt="The Pub Quiz Manager workspace showing a quiz detail page">
+    <figcaption>The workspace in action — quiz details, rounds, teams all already wired up.</figcaption>
+  </figure>
+
+  <h3>Adding extra fields to the question table and adding a workflow</h3>
+
+  <p>The current quiz design makes all questions active at the same time. We want to eventually add an interface for the teams to play the quiz on, so we need to add some additional information to the questions table and also add a workflow that sets all the questions to false.</p>
+
+  <div class="prompt">Currently when a quiz is active all the questions are also active. I want to change the questions so that only one question is active at a time. I want this so that we can build a quiz UI for all teams to see the same question at the same time. Can you add a current question flag to the questions table and also make a workflow that when a quiz is made active will make sure all the questions are not active.</div>
+
+  <p>Now even though we had asked for a workflow, Build Agent in its plan decided to create a business rule, so instead of just approving the plan, which looked like this:</p>
+
+  <figure>
+    <img src="images/img-20260511073727.png" alt="Build Agent's initial plan showing a business rule instead of a workflow">
+    <figcaption>The first attempt — Build Agent reached for a business rule instead of a flow.</figcaption>
+  </figure>
+
+  <p>…we ask Build Agent to create a workflow with a prompt like this:</p>
+
+  <div class="prompt">I asked you to create a workflow not a business rule to set the is_current flag on the questions table to false. Please correct this.</div>
+
+  <p>Build Agent will go away and make the appropriate changes to its plan, which now looks like this:</p>
+
+  <figure>
+    <img src="images/img-20260511074042.png" alt="Updated plan now showing a Flow being created instead of a business rule">
+    <figcaption>The revised plan — now a Flow using <code>updateMultipleRecords</code> on quiz activation.</figcaption>
+  </figure>
+
+  <p>Now that we are happy with the plan, let's approve it. Once that has completed, we have a new field added to the questions table:</p>
+
+  <figure>
+    <img src="images/img-20260511095206.png" alt="Question table now shows the new is_current boolean field">
+    <figcaption>The new <code>is_current</code> boolean field on the Question table.</figcaption>
+  </figure>
+
+  <p>…and we have a new workflow that has been created:</p>
+
+  <figure>
+    <img src="images/img-20260511095110.png" alt="The Reset Questions on Quiz Active flow with trigger and update action">
+    <figcaption>"Reset Questions on Quiz Active" — triggers on quiz status change, clears all flags.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <strong>Pattern worth remembering:</strong> Build Agent's first plan isn't always exactly what you asked for. Always read the plan before approving — a short clarifying prompt is much cheaper than a rollback.
+  </div>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 3 ============================== -->
+
+  <h2 id="section-3"><span class="num">Section 03 — Player UI</span>A UI for the teams to answer questions in</h2>
+
+  <p>So far we have built out the table structures and a simple workflow to build the quiz, but we really want a UI that the teams can interact with. We will also need to add a team owner, who will be the user that logs into the system to answer the questions. Let's add that first before we build the UI.</p>
+
+  <div class="prompt">In the Team table, we need a team owner field, someone who will log into ServiceNow and answer the questions that come up for their team. Can you add this please.</div>
+
+  <p>We now have a team owner field:</p>
+
+  <figure>
+    <img src="images/img-20260511095856.png" alt="Team table now shows the team_owner reference field at the top of the column list">
+    <figcaption>The new <code>team_owner</code> reference field on the Team table.</figcaption>
+  </figure>
+
+  <h3>Now let's create a team player UI</h3>
+
+  <p>Now let's ask Build Agent to create us a modern UI using React that team owners will interact with to answer the questions as they go active:</p>
+
+  <div class="prompt">Now we need to create an interactive UI for the team owner to log into. The owner will pick the team, if they are on more than 1 team to start with. When the quiz starts the team owner will see the question, where they can put in an answer and submit it. Once they have added an answer they can't then change it. They then wait for the next question to be made active. The interface needs to be clean and fun.</div>
+
+  <p>Make sure you are a team owner and then try and view the page. I have added myself as the team owner for two teams, so I see them both here:</p>
+
+  <figure>
+    <img src="images/img-20260511154218.png" alt="Pub Quiz Night welcome screen with two team cards: Quiz Khalifa and Les Quizerables">
+    <figcaption>The team picker — clean, fun, exactly as requested.</figcaption>
+  </figure>
+
+  <p>We click on a team and see the current question:</p>
+
+  <figure>
+    <img src="images/img-20260511154714.png" alt="Question card showing Q3 about UK number one singles, with answer textarea and Lock in answer button">
+    <figcaption>The active question with a textarea and a chunky Lock-in button.</figcaption>
+  </figure>
+
+  <p>We can lock in an answer:</p>
+
+  <figure>
+    <img src="images/img-20260511154737.png" alt="Confirmation screen showing answer locked in: I have no idea">
+    <figcaption>Answer locked in. No going back.</figcaption>
+  </figure>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 4 ============================== -->
+
+  <h2 id="section-4"><span class="num">Section 04 — Automation</span>Automating the current question</h2>
+
+  <p>Now that we have created a workspace for the quiz admin to create the quiz and questions, and we have created a nice simple UI for the teams to interact with, now we want to create the workflows and processes to make the system move forward through the rounds and the questions when the quiz is started.</p>
+
+  <p>Let's ask Build Agent how we should go about this:</p>
+
+  <div class="prompt">Now that we have created an admin workspace and a quiz team playing page, we now need to create a process to allow the quiz admin to press a button to start the quiz and then another to allow the quiz admin to move to the next question, going through each of the rounds in turn. When there are no more questions, a button should be available to finish the quiz. How would you suggest we go about this, come up with a plan.</div>
+
+  <p>We are asking Build Agent to work out the best way it thinks to create this functionality and give us a plan before anything is created.</p>
+
+  <p>So Build Agent has come back with a proposed approach:</p>
+
+  <figure>
+    <img src="images/img-20260511155954.png" alt="Build Agent's implementation plan: Script Include, Scripted REST API, and Admin UI Page">
+    <figcaption>Three components: a Script Include for logic, a Scripted REST API for endpoints, and a React-based admin UI.</figcaption>
+  </figure>
+
+  <p>This looks sensible, so let's approve the plan and set it in action. After some work, Build Agent completed:</p>
+
+  <figure>
+    <img src="images/img-20260511165417.png" alt="Build Agent's completion summary listing the three components delivered">
+    <figcaption>The three components delivered, with the quiz lifecycle state machine.</figcaption>
+  </figure>
+
+  <p>Build Agent has created a new page:</p>
+
+  <figure>
+    <img src="images/img-20260511164804.png" alt="Quiz Control Panel showing three quizzes including The Grand Friday Quiz in progress">
+    <figcaption>The Quiz Control Panel — pick a quiz to manage.</figcaption>
+  </figure>
+
+  <p>Clicking into the currently active quiz we can see what the current question is:</p>
+
+  <figure>
+    <img src="images/img-20260511164841.png" alt="The Grand Friday Quiz in progress showing Question 15 of 17 in the Wager Round about the iPhone release year">
+    <figcaption>Question 15 of 17, with the round name and a Next Question button.</figcaption>
+  </figure>
+
+  <p>If we go in as a team and see what question is active:</p>
+
+  <figure>
+    <img src="images/img-20260511164913.png" alt="Team player view showing Q1 about the first iPhone release, synced with the admin view">
+    <figcaption>Synced in real time across all team devices.</figcaption>
+  </figure>
+
+  <div class="callout">
+    We can do some extra prompting to get extra features in — such as a <strong>running score</strong>, maybe even a view on the question of who has answered and who is left to answer, and even maybe a <strong>timer</strong>. It's over to you now to see what extra features you can add to the Quiz Manager app.
+  </div>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== APPENDICES ============================== -->
+
+  <h2 id="appendix-a"><span class="num">Appendix A</span>UI errors — helping Build Agent fix them</h2>
+
+  <p>Sometimes when Build Agent is creating UI pages, especially in frameworks such as React, the page can compile and look fine, but at runtime you can get errors with the page not loaded.</p>
+
+  <p>So if for any reason you don't get a working page, check the JavaScript console for errors. If you see one, report it back to Build Agent — for me I had an issue with line 120, unexpected token <code>'&gt;'</code>:</p>
+
+  <figure>
+    <img src="images/img-20260511104841.png" alt="Browser console showing a SyntaxError: Unexpected token '>' at line 120 of quiz_player.do">
+    <figcaption>The browser console, where these errors surface.</figcaption>
+  </figure>
+
+  <p>Explain the error to Build Agent, give as much information as you can, don't be afraid to give a whole dump from the JavaScript console:</p>
+
+  <div class="prompt">There is an error on the x_snc_pub_quiz_o_0_quiz_player.do page at line 150, the error returned was "SyntaxError: Unexpected token '>'"</div>
+
+  <h2 id="appendix-b"><span class="num">Appendix B</span>How do I navigate to the pages that have been created?</h2>
+
+  <p>Normally, when Build Agent creates a new asset such as a page, it will tell you about this in the summary — but how do you find what the actual page URLs are when that summary has long gone?</p>
+
+  <p>In ServiceNow Studio, if you scroll down to the User Interface section, you will see the UI pages section:</p>
+
+  <figure class="narrow">
+    <img src="images/img-20260511165544.png" alt="Studio User Interface section showing UI Pages: leaderboard, quiz_control, quiz_player">
+    <figcaption>Studio's User Interface section, with each UI page listed.</figcaption>
+  </figure>
+
+  <p>Each new page that you have asked for is there. If we click the <code>quiz_control</code> page, Studio will open part of the IDE — as this is a React App, the menu on the left has changed, but the endpoint of the page is shown:</p>
+
+  <figure>
+    <img src="images/img-20260511165646.png" alt="Studio IDE view showing the quiz_control React source with the endpoint string visible">
+    <figcaption>The page source, with <code>endpoint: 'x_snc_pub_quiz_o_0_quiz_control.do'</code> visible.</figcaption>
+  </figure>
+
+  <p>To get back to the previous view, click the <strong>Apps</strong> icon (just below the <strong>+</strong> sign on the left) — this will return you back to Studio.</p>
+
+  <p>If you grab the endpoint and add it to your server URL, such as:</p>
+
+  <div class="prompt">https://{your_servicenow_system}/x_snc_pub_quiz_o_0_quiz_control.do</div>
+
+  <p>…the page will now show.</p>
+
+  <footer>
+    <div class="ornament">✦ ✦ ✦</div>
+    <p>End of workshop — now go and run a pub quiz.</p>
+  </footer>
+
+</div>
+</body>
+</html>
