@@ -374,34 +374,36 @@
     margin: 24px 0 32px;
   }
 
-  .checklist ol {
+  .checklist ol,
+  .checklist ul {
     margin: 0;
-    counter-reset: cl;
     list-style: none;
     padding-left: 0;
   }
 
-  .checklist ol li {
-    counter-increment: cl;
-    padding-left: 40px;
+  .checklist ol li,
+  .checklist ul li {
+    padding-left: 28px;
     position: relative;
     margin-bottom: 12px;
   }
 
-  .checklist ol li::before {
-    content: counter(cl);
+  .checklist ol li:last-child,
+  .checklist ul li:last-child { margin-bottom: 0; }
+
+  .checklist ol li::before,
+  .checklist ul li::before {
+    content: '◆';
     position: absolute;
-    left: 0;
+    left: 4px;
     top: 0;
-    font-family: 'Fraunces', serif;
-    font-style: italic;
-    font-size: 22px;
-    font-weight: 600;
+    font-size: 12px;
     color: var(--accent);
-    line-height: 1.2;
+    line-height: 1.6;
   }
 
-  .checklist ol li::marker { content: none; }
+  .checklist ol li::marker,
+  .checklist ul li::marker { content: none; }
 
   footer {
     margin-top: 120px;
@@ -544,7 +546,7 @@
   </figure>
 
   <div class="checklist">
-    <ol start="2">
+    <ol>
       <li>On the <strong>Custom Skills</strong> tab, click <strong>Create Skill</strong>.</li>
     </ol>
   </div>
@@ -555,7 +557,7 @@
   </figure>
 
   <div class="checklist">
-    <ol start="3">
+    <ol>
       <li>Give the skill a name and a description. The description is important — it's used to help build out the LLM prompt for you, and it's also how agents know what the skill does.</li>
     </ol>
   </div>
@@ -586,7 +588,7 @@
   <p>At this stage we're giving the skill an <em>overview</em> of what we want it to do. We'll get into the actual prompt shortly.</p>
 
   <div class="checklist">
-    <ol start="4">
+    <ol>
       <li>Pick the appropriate model. In this scenario I'm using <strong>Claude</strong> — I find it gives the best output for this kind of task. You can change the model later to try others.</li>
     </ol>
   </div>
@@ -597,7 +599,7 @@
   </figure>
 
   <div class="checklist">
-    <ol start="5">
+    <ol>
       <li>Scroll down and specify the role that the skill will have when it runs. This is usually the role it needs to access any data it would be given. For our scenario we're not worrying about that, so pick <code>snc_internal</code> and click <strong>Continue</strong>.</li>
     </ol>
   </div>
@@ -610,7 +612,7 @@
   <h3>Letting the LLM write its own prompt</h3>
 
   <div class="checklist">
-    <ol start="6">
+    <ol>
       <li>You'll now be taken to a screen to help you build out the prompt. We're going to get the LLM to help us — select <strong>Use an AI-generated prompt</strong>. The system will take the name and description and create an LLM prompt from that.</li>
     </ol>
   </div>
@@ -674,7 +676,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   <h3>Adding Skill Inputs</h3>
 
   <div class="checklist">
-    <ol start="7">
+    <ol>
       <li>Next we add the parameters we want to feed into the skill — these are called <strong>Skill Inputs</strong>. Click <strong>[+] Add</strong> and start filling them in.</li>
     </ol>
   </div>
@@ -713,7 +715,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   <p>Repeat for all the inputs. Don't worry if you forget one — we can add them later as well.</p>
 
   <div class="checklist">
-    <ol start="8">
+    <ol>
       <li>Click <strong>Continue to Summary</strong>, then on the summary screen click <strong>Finish Setup</strong>.</li>
     </ol>
   </div>
@@ -721,7 +723,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   <h3>Mapping inputs into the prompt</h3>
 
   <div class="checklist">
-    <ol start="9">
+    <ol>
       <li>Now we need to map the inputs into the prompt. You'll see placeholders with <code>{{ }}</code> around them — for example <code>{{#input_rounds}}</code>. Highlight one (or just delete it), then click <strong>+ Inputs and tools</strong>.</li>
     </ol>
   </div>
@@ -732,7 +734,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="10">
+    <ol>
       <li>Select the input you want to use.</li>
     </ol>
   </div>
@@ -743,7 +745,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="11">
+    <ol>
       <li>This replaces the placeholder. Once you've done all of them, your prompt should look like this:</li>
     </ol>
   </div>
@@ -760,7 +762,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   <h3>Running the first test</h3>
 
   <div class="checklist">
-    <ol start="12">
+    <ol>
       <li>Now we can test the prompt. Click <strong>Run Test</strong> at the bottom of the page — you'll get a dialog to fill in the parameters, with your defaults pre-populated.</li>
     </ol>
   </div>
@@ -771,7 +773,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="13">
+    <ol>
       <li>Click <strong>Run Test</strong> to see what comes out.</li>
     </ol>
   </div>
@@ -784,7 +786,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   <p>The output above has been truncated because the context window for the response is too small. At the bottom of the text box, you'll see that <strong>500 tokens</strong> were used to generate the output. We need to increase this.</p>
 
   <div class="checklist">
-    <ol start="14">
+    <ol>
       <li>Scroll back up and find the <strong>prompt settings</strong> icon on the right-hand side of the window.</li>
     </ol>
   </div>
@@ -795,7 +797,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="15">
+    <ol>
       <li>Click it. You'll see a Tokens section with a limit of 500 — we need to bump this up.</li>
     </ol>
   </div>
@@ -810,7 +812,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </div>
 
   <div class="checklist">
-    <ol start="16">
+    <ol>
       <li>Increase the response tokens to <strong>1500</strong>.</li>
     </ol>
   </div>
@@ -821,7 +823,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="17">
+    <ol>
       <li>Run the test again. The output is now complete, and you'll see we're using well under the 1500 limit.</li>
     </ol>
   </div>
@@ -851,7 +853,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="2">
+    <ol>
       <li>Wire it into the prompt:</li>
     </ol>
   </div>
@@ -869,7 +871,7 @@ The pub quiz application requires the following inputs:
   <p>You can see the additional line that's been added.</p>
 
   <div class="checklist">
-    <ol start="3">
+    <ol>
       <li>Run it and see what the output gives.</li>
     </ol>
   </div>
@@ -990,7 +992,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="4">
+    <ol>
       <li>Click <strong>4. Deployment and skill settings</strong>.</li>
     </ol>
   </div>
@@ -1001,7 +1003,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="5">
+    <ol>
       <li>Select <strong>Flow Action</strong> as where you want to use this skill. We <em>could</em> use it in a UI Action, but we'd need to build some scripts to extract the data and fill in the tables — we'll come back to that another day. If your skill fits with one of the other workflows (such as ITSM), you can add it there too. For now, leave it set to <strong>Other</strong>.</li>
       <li>Click <strong>Publish Skill</strong> at the top of the page. You'll get a dialog like this:</li>
     </ol>
@@ -1017,7 +1019,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   <p>Well done — you have built a skill. But now we need to activate it.</p>
 
   <div class="checklist">
-    <ol start="7">
+    <ol>
       <li>At the top of the page there is an Admin menu — click it and select <strong>Now Assist Admin</strong>.</li>
     </ol>
   </div>
@@ -1028,7 +1030,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="8">
+    <ol>
       <li>Click the <strong>Now Assist skills</strong> tab and then the <strong>Other</strong> section on the left.</li>
     </ol>
   </div>
@@ -1039,7 +1041,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="9">
+    <ol>
       <li>Click the <strong>Available</strong> tab. Your new "Pub Quiz Question and Answer Generator" skill should show. If it doesn't, go back to the skill and make sure you've published it.</li>
     </ol>
   </div>
@@ -1050,7 +1052,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="10">
+    <ol>
       <li>Click <strong>Activate Skill</strong>. You'll be asked to activate for the options you chose — in our case just <strong>Flow Action</strong>. Click the toggle and then <strong>Save and Continue</strong>.</li>
     </ol>
   </div>
@@ -1061,7 +1063,7 @@ Ensure questions and answers are accurate, engaging, and match the input criteri
   </figure>
 
   <div class="checklist">
-    <ol start="11">
+    <ol>
       <li>Review the access requirements — you can add extra roles here if you like. For now just click <strong>Save and Continue</strong>.</li>
       <li>On the review page, click <strong>Activate</strong>.</li>
     </ol>
@@ -1133,7 +1135,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="2">
+    <ol>
       <li>Now let's test it to see if it works.</li>
     </ol>
   </div>
@@ -1160,7 +1162,7 @@ Here is an example of the output from the skill:
   <p>Some fields still need to be filled in — but we'll build a workflow to handle that.</p>
 
   <div class="checklist">
-    <ol start="3">
+    <ol>
       <li>Make sure you <strong>publish</strong> the action.</li>
     </ol>
   </div>
@@ -1228,7 +1230,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="3">
+    <ol>
       <li>Select the <strong>Build on your own</strong> tab. Give it a name and a description and click <strong>Build your own</strong>.</li>
     </ol>
   </div>
@@ -1239,7 +1241,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="4">
+    <ol>
       <li>When the Flow Designer window comes up, the trigger is going to be <strong>Application → Service Catalogue</strong>.</li>
     </ol>
   </div>
@@ -1250,7 +1252,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="5">
+    <ol>
       <li>Add an action to <strong>get the catalogue item variables</strong>. Fill in the request record and the template catalogue item, which is our <strong>Pub Quiz Creator</strong>.</li>
     </ol>
   </div>
@@ -1261,7 +1263,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="6">
+    <ol>
       <li>Select all the fields you want to use in the flow.</li>
       <li>Now we want to execute our skill — this is done by selecting the action <strong>Execute Skill</strong>.</li>
     </ol>
@@ -1273,7 +1275,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="8">
+    <ol>
       <li>Pick the skill you want to use. The fields the skill requires are shown with the defaults you specified.</li>
     </ol>
   </div>
@@ -1284,7 +1286,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="9">
+    <ol>
       <li>Map the catalogue item fields into the skill where appropriate.</li>
     </ol>
   </div>
@@ -1295,7 +1297,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="10">
+    <ol>
       <li>Next we want to pass the output from the skill to our action — so let's add the action next.</li>
     </ol>
   </div>
@@ -1306,7 +1308,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="11">
+    <ol>
       <li>Drag the <strong>response</strong> object (under the output from the skill) into the action.</li>
     </ol>
   </div>
@@ -1317,7 +1319,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="12">
+    <ol>
       <li>Now take the output from this action and <strong>open the quiz record</strong> that has been created for us.</li>
     </ol>
   </div>
@@ -1328,7 +1330,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="13">
+    <ol>
       <li>Update the quiz record with the additional information (date, location, description).</li>
     </ol>
   </div>
@@ -1339,7 +1341,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="14">
+    <ol>
       <li>Activate the flow, then attach it to the catalogue item.</li>
     </ol>
   </div>
@@ -1350,7 +1352,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="15">
+    <ol>
       <li>Submit the catalogue item.</li>
     </ol>
   </div>
@@ -1375,7 +1377,7 @@ Here is an example of the output from the skill:
   <div class="prompt url">https://{your_instance}/esc</div>
 
   <div class="checklist">
-    <ol start="2">
+    <ol>
       <li>Start typing "Pub Quiz" into the search box.</li>
     </ol>
   </div>
@@ -1386,7 +1388,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="3">
+    <ol>
       <li>Fill in the catalogue item and click <strong>Submit</strong>.</li>
     </ol>
   </div>
@@ -1397,7 +1399,7 @@ Here is an example of the output from the skill:
   </figure>
 
   <div class="checklist">
-    <ol start="4">
+    <ol>
       <li>Switch back to Studio and look at the flow executions.</li>
     </ol>
   </div>

@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents &amp; the Pub Quiz — Part Three</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* ServiceNow brand palette
+       Dark Green (Outer Space) #293E40 — primary
+       Light Green (Kailani)    #81B5A1 — secondary */
+    --bg: #f3f1ec;
+    --bg-paper: #ffffff;
+    --ink: #1a2628;
+    --ink-soft: #3a4b4d;
+    --ink-faint: #6f7e80;
+    --accent: #293E40;
+    --accent-deep: #182729;
+    --secondary: #81B5A1;
+    --secondary-soft: #c8ddd2;
+    --rule: #293E40;
+    --highlight: #d4e7dd;
+    --code-bg: #1a2628;
+    --code-ink: #e8efed;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    font-size: 17px;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(41, 62, 64, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 80% 60%, rgba(129, 181, 161, 0.10) 0%, transparent 40%);
+    background-attachment: fixed;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0 0.1 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 80px 48px 120px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .breadcrumb {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .breadcrumb a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent);
+    padding-bottom: 1px;
+  }
+
+  .breadcrumb a:hover { color: var(--accent-deep); }
+
+  header {
+    text-align: center;
+    margin-bottom: 80px;
+    padding-bottom: 48px;
+    border-bottom: 2px solid var(--rule);
+    position: relative;
+  }
+
+  header::after {
+    content: '✦';
+    position: absolute;
+    bottom: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    padding: 0 16px;
+    color: var(--accent);
+    font-size: 22px;
+  }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(48px, 8vw, 88px);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+    margin-bottom: 20px;
+    font-variation-settings: "opsz" 144;
+  }
+
+  h1 .ampersand {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .subtitle {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink-soft);
+    font-weight: 400;
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.4;
+  }
+
+  .intro {
+    background: var(--bg-paper);
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    border-left: 4px solid var(--accent);
+    padding: 32px 40px;
+    margin-bottom: 64px;
+    box-shadow: 4px 4px 0 rgba(42, 38, 32, 0.06);
+  }
+
+  .intro p { margin-bottom: 16px; }
+  .intro p:last-child { margin-bottom: 0; }
+
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 42px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin: 80px 0 24px;
+  }
+
+  h2 .num {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    margin-bottom: 12px;
+    font-variation-settings: normal;
+  }
+
+  h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 26px;
+    color: var(--ink);
+    margin: 48px 0 16px;
+    letter-spacing: -0.01em;
+  }
+
+  h4 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 32px 0 12px;
+  }
+
+  p {
+    margin-bottom: 20px;
+    max-width: 68ch;
+  }
+
+  p strong {
+    font-weight: 600;
+    color: var(--ink);
+    background: linear-gradient(180deg, transparent 60%, var(--highlight) 60%);
+    padding: 0 2px;
+  }
+
+  ul, ol {
+    margin: 0 0 24px 24px;
+    padding-left: 8px;
+  }
+
+  ul li, ol li {
+    margin-bottom: 10px;
+    padding-left: 8px;
+  }
+
+  ul li::marker {
+    color: var(--accent);
+    content: '◆  ';
+  }
+
+  ol li::marker {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+
+  .prompt {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    padding: 28px 32px;
+    margin: 28px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    position: relative;
+    border-radius: 2px;
+    box-shadow:
+      0 2px 0 var(--accent),
+      6px 6px 0 rgba(42, 38, 32, 0.15);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .prompt::before {
+    content: 'PROMPT';
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: var(--accent);
+    color: var(--bg-paper);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+    padding: 4px 10px;
+  }
+
+  .prompt::after {
+    content: '↪';
+    position: absolute;
+    top: 8px;
+    right: 16px;
+    color: var(--secondary);
+    font-size: 18px;
+    opacity: 0.6;
+  }
+
+  .prompt.chat::before { content: 'CHAT TEST'; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+    background: rgba(41, 62, 64, 0.06);
+    color: var(--accent-deep);
+    padding: 2px 6px;
+    border-radius: 2px;
+    border: 1px solid rgba(41, 62, 64, 0.12);
+  }
+
+  .callout {
+    background: var(--bg-paper);
+    border-left: 3px solid var(--secondary);
+    padding: 20px 28px;
+    margin: 28px 0;
+    font-size: 16px;
+  }
+
+  .callout strong { color: var(--accent-deep); }
+
+  figure {
+    margin: 40px 0;
+    text-align: center;
+  }
+
+  figure img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid rgba(42, 38, 32, 0.15);
+    box-shadow: 4px 4px 0 rgba(42, 38, 32, 0.1);
+    background: white;
+  }
+
+  figure.narrow img {
+    max-width: 380px;
+  }
+
+  figcaption {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-faint);
+    margin-top: 12px;
+    max-width: 60ch;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .field-table {
+    background: var(--bg-paper);
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    border-collapse: collapse;
+    width: 100%;
+    margin: 24px 0 32px;
+    font-size: 15px;
+    box-shadow: 4px 4px 0 rgba(42, 38, 32, 0.06);
+  }
+
+  .field-table th {
+    background: var(--accent);
+    color: var(--bg-paper);
+    text-align: left;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .field-table td {
+    padding: 14px 16px;
+    border-top: 1px solid rgba(42, 38, 32, 0.1);
+    vertical-align: top;
+  }
+
+  .field-table tr:nth-child(even) td {
+    background: rgba(129, 181, 161, 0.06);
+  }
+
+  .field-table td:first-child {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent-deep);
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .field-table td ol {
+    margin: 0 0 0 18px;
+    padding-left: 0;
+  }
+
+  .field-table td ol li {
+    margin-bottom: 6px;
+    padding-left: 4px;
+  }
+
+  .field-table td ol li:last-child { margin-bottom: 0; }
+
+  .field-table td ol ol {
+    margin-top: 6px;
+    margin-bottom: 6px;
+  }
+
+  .checklist {
+    background: var(--bg-paper);
+    padding: 24px 32px;
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    margin: 24px 0 32px;
+  }
+
+  .checklist ol,
+  .checklist ul {
+    margin: 0;
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .checklist ol li,
+  .checklist ul li {
+    padding-left: 28px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .checklist ol li:last-child,
+  .checklist ul li:last-child { margin-bottom: 0; }
+
+  .checklist ol li::before,
+  .checklist ul li::before {
+    content: '◆';
+    position: absolute;
+    left: 4px;
+    top: 0;
+    font-size: 12px;
+    color: var(--accent);
+    line-height: 1.6;
+  }
+
+  .checklist ol li::marker,
+  .checklist ul li::marker { content: none; }
+
+  footer {
+    margin-top: 120px;
+    padding-top: 48px;
+    border-top: 2px solid var(--rule);
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: var(--ink-faint);
+    font-size: 15px;
+  }
+
+  footer .ornament {
+    font-size: 24px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    letter-spacing: 0.5em;
+  }
+
+  .toc {
+    background: var(--bg-paper);
+    border: 1px solid rgba(42, 38, 32, 0.12);
+    padding: 24px 32px;
+    margin: 0 0 64px;
+  }
+
+  .toc-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+
+  .toc ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .toc ol li {
+    padding: 6px 0;
+    border-bottom: 1px dotted rgba(42, 38, 32, 0.2);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .toc ol li:last-child { border-bottom: none; }
+  .toc ol li::marker { content: none; }
+  .toc ol li::before { content: none; }
+
+  .toc ol li .num-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+    min-width: 40px;
+    flex-shrink: 0;
+  }
+
+  .toc ol li a {
+    color: var(--ink);
+    text-decoration: none;
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    flex: 1;
+    transition: color 0.2s;
+  }
+
+  .toc ol li a:hover { color: var(--accent); }
+
+  .divider {
+    text-align: center;
+    margin: 64px 0 32px;
+    color: var(--accent);
+    font-size: 18px;
+    letter-spacing: 1em;
+    opacity: 0.5;
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 48px 24px 80px; }
+    h1 { font-size: 48px; }
+    h2 { font-size: 32px; }
+    h3 { font-size: 22px; }
+    body { font-size: 16px; }
+    .intro, .callout, .checklist, .toc { padding-left: 20px; padding-right: 20px; }
+    .prompt { padding: 24px 20px; font-size: 13px; }
+    .field-table { font-size: 13px; }
+    .field-table th, .field-table td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="breadcrumb"><a href="../index.html">← Pub Quiz Manager Workshops</a></div>
+
+  <header>
+    <div class="eyebrow">Part Three — A ServiceNow AI Agent Studio Workshop</div>
+    <h1>Agents <span class="ampersand">&amp;</span><br>the Pub Quiz</h1>
+    <p class="subtitle">Wiring the skill, the action and a lookup into a single AI agent — so a quiz can be conjured up from a sentence of plain English.</p>
+  </header>
+
+  <div class="intro">
+    <p>Well done for making it this far. You've built the app with <strong>Build Agent</strong>, created a <strong>skill</strong> that puts AI to work inside the app, and used a <strong>flow</strong> to automate the generation of a whole quiz from a catalogue item.</p>
+    <p>Now we want to look at the power of <strong>agents</strong> — and how we can use them to perform specific tasks for us automatically, off the back of a single conversational prompt.</p>
+  </div>
+
+  <div class="toc">
+    <div class="toc-title">Session Structure</div>
+    <ol>
+      <li><span class="num-tag">§ 1</span><a href="#section-1">Creating an Agent in AI Agent Studio</a></li>
+      <li><span class="num-tag">§ 2</span><a href="#section-2">Adding tools — the skill, the action, a record lookup</a></li>
+      <li><span class="num-tag">§ 3</span><a href="#section-3">A subflow to update the quiz, and adding it as a tool</a></li>
+      <li><span class="num-tag">§ 4</span><a href="#section-4">User access, data access and triggers</a></li>
+      <li><span class="num-tag">§ 5</span><a href="#section-5">Channels, status and activation</a></li>
+      <li><span class="num-tag">§ 6</span><a href="#section-6">Testing the AI Agent</a></li>
+      <li><span class="num-tag">§ 7</span><a href="#section-7">Using the agent in Virtual Agent</a></li>
+      <li><span class="num-tag">§ 8</span><a href="#section-8">Tidying up the output and playing with prompts</a></li>
+    </ol>
+  </div>
+
+  <!-- ============================== SECTION 1 ============================== -->
+
+  <h2 id="section-1"><span class="num">Section 01 — Create an Agent</span>Creating an Agent</h2>
+
+  <p>An <strong>agent</strong> is given a set of steps to perform and a number of tools to perform them with. Those tools can be skills, flows, scripts — anything we can wire in.</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Open <strong>AI Agent Studio → Create and Manage</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515112614.png" alt="AI Agent Studio Create and Manage screen">
+    <figcaption>AI Agent Studio — where agents are born.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Select <strong>AI Agents</strong> and click <strong>Add</strong>. Make sure you're in the correct application scope if you've just logged in.</li>
+      <li>First, give the agent a name and a description. This matters — later, when we make this agent agentic, the description is what helps the LLM understand what the agent can do.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515112815.png" alt="Agent details screen with name and description fields">
+    <figcaption>Name and describe — the description is read by other LLMs deciding whether to call this agent.</figcaption>
+  </figure>
+
+  <h3>Defining the role and the steps</h3>
+
+  <p>Next we need to define the agent's role and its list of steps. You may have to come back and adjust the steps as we add tools and adjust what the tools do — but for now, put an outline of the steps the agent needs to perform. Think of this as the process flow the agent will follow.</p>
+
+  <table class="field-table">
+    <thead>
+      <tr><th>Field</th><th>Value</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>AI Agent Role</td>
+        <td>You're an expert quiz creator. Your task is to have a conversation with the user to find out what kind of quiz they want to run, and then create some sample questions and set up the quiz for them.</td>
+      </tr>
+      <tr>
+        <td>List of Steps</td>
+        <td>
+          <ol>
+            <li>Ask the user for the following information if they haven't provided it already:
+              <ol type="a">
+                <li>What the quiz will be called and a rough description. If they've provided information in the description that you need, use it — don't ask again.</li>
+                <li>Where the quiz will be held / the location.</li>
+                <li>What the topics are — make sure you have at least 3 different topics and arrange them in a list.</li>
+                <li>How many rounds. If the user isn't sure, suggest at least one round per topic.</li>
+                <li>How many questions they want in each round. If unsure, suggest around 5.</li>
+                <li>How they'd like the difficulty distributed. For example, percentages of each type, or just "a mix" or "more easy than hard".</li>
+                <li>When they're planning to run the quiz.</li>
+                <li>Whether the user is running the quiz, or someone else. If someone else, get their name.</li>
+              </ol>
+            </li>
+            <li>Look up the name of the host (from 1h) to make sure they're a user in ServiceNow. Use a tool to find the user. If they can't be found, let the user know — ask again, or suggest they could be the host for now.</li>
+            <li>Provide a summary of the information provided, and verify the user is happy with it.</li>
+            <li>Use the <strong>Pub Quiz Question and Answer Generator</strong> to create the outline quiz. It will return a JSON of the questions.</li>
+            <li>Pass this JSON on to the <strong>Parse Quiz JSON</strong> action. It will take this JSON and create the quiz records, and return the sys_id of the new quiz record. This is needed in the next step.</li>
+            <li>Update the quiz using the <strong>Update Quiz Tool</strong> with the quiz sys_id from step 5 and the additional information provided by the user.</li>
+            <li>Give the user a summary of the kind of questions the quiz generator has produced.</li>
+          </ol>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="checklist">
+    <ol>
+      <li>All other options on this page we'll leave off for now — we don't need long-term memory at this point. Click <strong>Save and Continue</strong>.</li>
+    </ol>
+  </div>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 2 ============================== -->
+
+  <h2 id="section-2"><span class="num">Section 02 — Tools</span>Adding the tools the agent will use</h2>
+
+  <p>Tools are what make the agent work — think of them as the equipment the agent reaches for to get a job done. We're going to use the quiz generator skill we created in Part Two, the Parse Quiz JSON action to create the records, and a record lookup so we can find the host user.</p>
+
+  <h3>Tool 1 — The Quiz Generator skill</h3>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Add Tool</strong> and select <strong>Now Assist Skill</strong>.</li>
+      <li>Pick the <strong>Pub Quiz Question and Answer Generator</strong> skill.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515113506.png" alt="Selecting the Pub Quiz Question and Answer Generator skill as a tool">
+    <figcaption>The skill from Part Two, now picked as a tool for the agent.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>The required fields will get populated for you. Scroll down, fill in the name and description, and pick <strong>Autonomous</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515113554.png" alt="Tool settings with Autonomous execution mode selected">
+    <figcaption>Set the tool to Autonomous — the agent will fire it without asking.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <strong>Note:</strong> as with everything else, the description gives the LLM pointers as to how to fill in the tool's inputs and what it will return. Put as much context as makes sense in the description.
+  </div>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Add</strong>.</li>
+    </ol>
+  </div>
+
+  <h3>Tool 2 — The Parse Quiz JSON action</h3>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Add Tool</strong> again and this time select <strong>Flow Action</strong>.</li>
+      <li>Pick the <strong>Parse Quiz JSON</strong> action we created earlier.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515113840.png" alt="Selecting the Parse Quiz JSON flow action as a tool">
+    <figcaption>The action from Part Two, joining the toolkit.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Fill in the information about the action — again, make the description as descriptive as possible — and set this one to <strong>Autonomous</strong> too.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515113939.png" alt="Action tool configuration with Autonomous selected">
+    <figcaption>Describe and set to Autonomous.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Add</strong>.</li>
+    </ol>
+  </div>
+
+  <h3>Tool 3 — Looking up the host user</h3>
+
+  <p>We need to look up the user who will host the quiz, so we have their sys_id to pass into the final step. Someone might give us a user ID, full name, or email — so the lookup needs to be flexible.</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Add Tool</strong> again.</li>
+      <li>Select <strong>Record Operation</strong>.</li>
+      <li>Give the tool a name and description, and specify the input. The user might give the User ID, full name, or email address in a single field.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515114319.png" alt="Record Operation tool with a single input field for user identifier">
+    <figcaption>One flexible input field — name, email, or user ID, anything goes.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Add the <strong>User</strong> table as the place to search, and set the record operation to <strong>Lookup Records</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515114414.png" alt="User table picked with Lookup Records operation">
+    <figcaption>Search the User table, retrieve only — no writes here.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>The filter should match on name, user ID, or email — we'll just do an OR across those fields and return the first record we find. We could return more and ask the user to pick.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515114528.png" alt="OR filter across name, user ID and email fields">
+    <figcaption>OR across the three fields — flexible matching, first hit wins.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Specify the fields you want to return, order by first name, and put the output in A to Z order.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515114618.png" alt="Output field selection and sort order configuration">
+    <figcaption>Pick the fields the agent needs back, sorted predictably.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Add</strong>.</li>
+    </ol>
+  </div>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 3 ============================== -->
+
+  <h2 id="section-3"><span class="num">Section 03 — Subflow tool</span>A subflow to update the quiz</h2>
+
+  <p>Sometimes the standard <strong>Update Record</strong> tool inside the agent doesn't do quite what we want — so let's create an action or a subflow to do it for us. Switch over to ServiceNow Studio and ask Build Agent to create the subflow.</p>
+
+  <p>Use this prompt in Build Agent:</p>
+
+  <div class="prompt">Create a subflow called "Update Quiz Details" in the Pub Quiz Organiser app. The subflow should accept the following inputs:
+
+- **quiz_sys_id** (String, mandatory) — the sys_id of the quiz record to update
+- **description** (String, optional) — the quiz description
+- **host** (String, optional) — the sys_id of the host user
+- **venue** (String, optional) — the venue name
+- **date** (DateTime, optional) — the date and time of the quiz
+
+The subflow should update the record on the `x_snc_pub_quiz_o_0_quiz` table (identified by quiz_sys_id) setting the description, host, venue, and date fields with the input values. Run as system with public access so it can be invoked by an AI agent.</div>
+
+  <p>Once that's completed, go back to the Agent setup window and add the subflow.</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Add Tool</strong> and select <strong>Subflow</strong>.</li>
+      <li>Pick the subflow you just created — the input fields will be shown.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515114932.png" alt="Subflow picker showing the Update Quiz Details subflow">
+    <figcaption>The freshly-built subflow, ready to be wired in.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Give the subflow tool a name and a description. Be specific — especially if the fields the agent is working with don't 100% match the subflow inputs, a clear description helps the agent pass the right information.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515115059.png" alt="Subflow tool with a clear name and detailed description">
+    <figcaption>A clear description here saves a lot of debugging later.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Add</strong>.</li>
+      <li>Click <strong>Save and Continue</strong> to move on to the next stage.</li>
+    </ol>
+  </div>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 4 ============================== -->
+
+  <h2 id="section-4"><span class="num">Section 04 — Access &amp; triggers</span>Defining user access, data access and triggers</h2>
+
+  <p>There are two things we need to define for this agent:</p>
+
+  <ul>
+    <li><strong>User Access</strong> — who can see and use this agent.</li>
+    <li><strong>Data Access</strong> — what role the agent has when accessing and updating data.</li>
+  </ul>
+
+  <div class="checklist">
+    <ol>
+      <li>Specify the roles for each section. For user access we'll go with <code>snc_internal</code> — anyone internal to the organisation. We might want to be more specific in real life, but for our POC this is fine.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515115414.png" alt="User Access configuration with snc_internal role">
+    <figcaption>User Access — anyone internal can call this agent.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Save and Continue</strong>.</li>
+      <li>For data access, we'll specify <code>snc_internal</code> too, since we haven't locked down the data tables we'll be accessing.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515115738.png" alt="Data Access configuration with snc_internal role">
+    <figcaption>Data Access — the role the agent runs as when it reads and writes.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Save and Continue</strong>.</li>
+    </ol>
+  </div>
+
+  <h3>Agent Triggers</h3>
+
+  <p>If we wanted this agent to start when a record is updated, or at specific times during the day, we could specify that here.</p>
+
+  <figure>
+    <img src="images/img-20260515115909.png" alt="Agent Triggers page with no triggers configured">
+    <figcaption>Triggers — we'll leave these blank since we're invoking from chat.</figcaption>
+  </figure>
+
+  <p>We don't want a trigger here — we're going to invoke this from the agent window — so leave it blank and click <strong>Save and Continue</strong>.</p>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 5 ============================== -->
+
+  <h2 id="section-5"><span class="num">Section 05 — Channels &amp; status</span>Where this agent lives</h2>
+
+  <p>This page is where we say whether this agent should be accessible from the virtual agent — which we do want.</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Check the <strong>Allow</strong> box on the Chat Assistant dialogue.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515120144.png" alt="Channels page with the Chat Assistant Allow checkbox enabled">
+    <figcaption>Allow the agent to be invoked from the Chat Assistant.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Specify the virtual agents this should appear in. If you have different virtual agents for different portals or spaces, you need to specify all of them.</li>
+      <li>Finally, make the agent active — at the bottom of the page, check <strong>This AI Agent is active</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515120315.png" alt="The This AI Agent is active checkbox at the bottom of the page">
+    <figcaption>The all-important active toggle.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Click <strong>Save and Test</strong> to move into the testing phase.</li>
+    </ol>
+  </div>
+
+  <p>You may get a dialogue saying there are other agents like yours, which on a shared environment is likely. If the highlighted agent looks similar, go and change the name and description slightly to make yours different.</p>
+
+  <figure>
+    <img src="images/img-20260515120532.png" alt="Dialog warning about similar agents on the instance">
+    <figcaption>Shared environments breed similar agents — easy to fix.</figcaption>
+  </figure>
+
+  <p>If the agent shown is nothing like yours, just click <strong>Ignore and Continue</strong>.</p>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 6 ============================== -->
+
+  <h2 id="section-6"><span class="num">Section 06 — Testing</span>Testing the AI Agent</h2>
+
+  <p>You'll now see a window where you can put in your test prompt to start the process. You can give just a small amount of information, or a lot — the choice is yours. I'd suggest trying different test scenarios to mimic real chats.</p>
+
+  <figure>
+    <img src="images/img-20260515120721.png" alt="The agent test window ready for a prompt">
+    <figcaption>The agent test window — your sandbox for prompt experiments.</figcaption>
+  </figure>
+
+  <div class="prompt chat">create me a quiz that will be hosted at my house and will cover topics of computer science, maths and physics. Make the questions fairly simple and I'd like 5 questions per round. The quiz has a description of "Happy Revision" and will take place tomorrow at my home. I will host the quiz.</div>
+
+  <p>I've actually given most of the information up-front in that prompt. It's missing the number of rounds, so let's see how the agent handles it.</p>
+
+  <p>First, it's identified me as the host and gone off to look up my user record. Then it moves on to giving a summary:</p>
+
+  <figure>
+    <img src="images/img-20260515120926.png" alt="Agent showing host lookup result and summary of provided information">
+    <figcaption>Host identified, missing field flagged, summary presented for sign-off.</figcaption>
+  </figure>
+
+  <p>I agree to this and let it proceed.</p>
+
+  <p>It's then started the quiz generator as per the instructions and created the quiz, but it's now asking whether I want to proceed to update the rest of the information — which is exactly what I asked it to do:</p>
+
+  <figure>
+    <img src="images/img-20260515121057.png" alt="Agent confirming before updating the quiz with extra information">
+    <figcaption>Confirming before the final update — sensible defensive behaviour from the agent.</figcaption>
+  </figure>
+
+  <p>The agent has now given me a summary as per the instructions and completed the task it was given:</p>
+
+  <figure>
+    <img src="images/img-20260515121142.png" alt="Final summary from the agent listing the questions it produced">
+    <figcaption>Task complete — quiz built, host attached, summary delivered.</figcaption>
+  </figure>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 7 ============================== -->
+
+  <h2 id="section-7"><span class="num">Section 07 — Virtual Agent</span>Using the agent in Virtual Agent</h2>
+
+  <p>Now the agent is active, we can try it for real.</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Log into a service portal and open the Virtual Agent.</li>
+      <li>Paste in the instructions from before.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515121921.png" alt="Virtual Agent receiving the quiz creation prompt">
+    <figcaption>Virtual Agent — same prompt, same agent, real channel.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>The agent will now fire off and build the quiz for us.</li>
+    </ol>
+  </div>
+
+  <div class="divider">✦ ✦ ✦</div>
+
+  <!-- ============================== SECTION 8 ============================== -->
+
+  <h2 id="section-8"><span class="num">Section 08 — Tidy up &amp; play</span>Tidying the output and playing with prompts</h2>
+
+  <p>Now that we've run the agent a few times, you'll have seen a lot of JSON and debug information come through. Let's go back to the agent's tools and switch off the output for any tool that shouldn't be talking to the user.</p>
+
+  <div class="checklist">
+    <ol>
+      <li>Go back to the Tools window and select the tool to clean up. In this example the action outputs a sys_id — we don't need the user to see that.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515122230.png" alt="Tool configuration showing Display Output toggle">
+    <figcaption>The Display Output toggle — turn it off for any tool the user shouldn't hear from.</figcaption>
+  </figure>
+
+  <div class="checklist">
+    <ol>
+      <li>Switch <strong>Display Output</strong> to off.</li>
+      <li>Repeat for any other tools that don't need to output.</li>
+      <li>Update the Update Quiz tool to be <strong>Autonomous</strong>.</li>
+    </ol>
+  </div>
+
+  <figure>
+    <img src="images/img-20260515122421.png" alt="Update Quiz tool now set to Autonomous">
+    <figcaption>Set the update tool to Autonomous so the agent doesn't pause to ask.</figcaption>
+  </figure>
+
+  <h3>Play around with the prompts</h3>
+
+  <p>Now we have it working, try some different requests. This one I built for my kids — slightly harder questions:</p>
+
+  <div class="prompt chat">create me a quiz that will be hosted at my house and will cover topics of computer science, maths and physics. Make the questions suitable for a 15 year old, doing GCSEs and I'd like 5 questions per round. The quiz has a description of "Happy Revision" and will take place tomorrow at my home. I will host the quiz.</div>
+
+  <p>The agent came back with some harder questions:</p>
+
+  <figure>
+    <img src="images/img-20260515122839.png" alt="Final agent output showing harder GCSE-level questions">
+    <figcaption>Same agent, different audience — GCSE-level questions on demand.</figcaption>
+  </figure>
+
+  <div class="callout">
+    <strong>What you've built across the trilogy:</strong> a fully-functional Pub Quiz Manager scaffolded with Build Agent, an AI skill that authors quizzes, a catalogue-item flow that drives them in, and now an agent that wraps the lot behind a single conversational prompt. From here, the next steps are yours — extra tools, agentic triggers, multi-agent handoffs, image generation per round… have fun.
+  </div>
+
+  <footer>
+    <div class="ornament">✦ ✦ ✦</div>
+    <p>End of Part Three — and end of the trilogy. Go run a pub quiz.</p>
+  </footer>
+
+</div>
+</body>
+</html>

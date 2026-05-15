@@ -301,34 +301,36 @@
     margin: 24px 0 32px;
   }
 
-  .checklist ol {
+  .checklist ol,
+  .checklist ul {
     margin: 0;
-    counter-reset: cl;
     list-style: none;
     padding-left: 0;
   }
 
-  .checklist ol li {
-    counter-increment: cl;
-    padding-left: 40px;
+  .checklist ol li,
+  .checklist ul li {
+    padding-left: 28px;
     position: relative;
     margin-bottom: 12px;
   }
 
-  .checklist ol li::before {
-    content: counter(cl);
+  .checklist ol li:last-child,
+  .checklist ul li:last-child { margin-bottom: 0; }
+
+  .checklist ol li::before,
+  .checklist ul li::before {
+    content: '◆';
     position: absolute;
-    left: 0;
+    left: 4px;
     top: 0;
-    font-family: 'Fraunces', serif;
-    font-style: italic;
-    font-size: 22px;
-    font-weight: 600;
+    font-size: 12px;
     color: var(--accent);
-    line-height: 1.2;
+    line-height: 1.6;
   }
 
-  .checklist ol li::marker { content: none; }
+  .checklist ol li::marker,
+  .checklist ul li::marker { content: none; }
 
   footer {
     margin-top: 120px;
